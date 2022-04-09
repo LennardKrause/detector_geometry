@@ -73,22 +73,20 @@ def build_detector():
             X,Y,Z = create_cone(i, 0, 0, 0)
             # don't draw contour lines that are out of bounds
             # make sure Z is large enough to draw the contour
-            if np.max(Z) < geo_dist:
-                continue
-            c0 = ax.contour(X, Y, Z, [geo_dist], colors='black', alpha=0.1)
-            # label original geometry contours
-            fmt = {c0.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
-            ax.clabel(c0, c0.levels, inline=True, fontsize=8, fmt=fmt, manual=[(50,100)])
+            if np.max(Z) >= geo_dist:
+                c0 = ax.contour(X, Y, Z, [geo_dist], colors='black', alpha=0.1)
+                # label original geometry contours
+                fmt = {c0.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
+                ax.clabel(c0, c0.levels, inline=True, fontsize=8, fmt=fmt, manual=[(50,100)])
         
         # draw contours for the tilted/rotated/moved geometry
         X,Y,Z = create_cone(i, geo_rota, geo_tilt, geo_yoff)
         # make sure Z is large enough to draw the contour
-        if np.max(Z) < geo_dist:
-            continue
-        c1 = ax.contour(X, Y, Z, [geo_dist], colors=colors.to_hex(plt_cmap((n+1)/len(plt_lines))))
-        # label moved geometry contours
-        fmt = {c1.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
-        ax.clabel(c1, c1.levels, inline=True, fontsize=8, fmt=fmt, manual=[( 0,100)])
+        if np.max(Z) >= geo_dist:
+            c1 = ax.contour(X, Y, Z, [geo_dist], colors=colors.to_hex(plt_cmap((n+1)/len(plt_lines))))
+            # label moved geometry contours
+            fmt = {c1.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
+            ax.clabel(c1, c1.levels, inline=True, fontsize=8, fmt=fmt, manual=[( 0,100)])
 
 def create_cone(dim, rota, tilt, yoff):
     # creating grid
