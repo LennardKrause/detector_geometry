@@ -9,7 +9,7 @@
  - run it.
 
 ## To add a detector:
- - add/change the specifications.
+ - add/change the detector specifications.
  - comment/uncomment to change between setups.
 
 ## Here's an example showing an Pilatus3 2M offset vertically:
@@ -24,7 +24,7 @@
  | plt_unit = 'q'    | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
  | plt_origin = True | [bool] plot contour lines for original geometry?
  
- |  Specifications   |   |
+ |     Detector      |   |
  |-------------------|---|
  | det_name = 'Pilatus3 X CdTe 2M' |
  | det_hms = 8.38     | [cm]  module size (horizontal)
@@ -49,7 +49,7 @@
  | plt_unit = 'd'    | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
  | plt_origin = True | [bool] plot contour lines for original geometry?
  
- |  Specifications   |   |
+ |     Detector      |   |
  |-------------------|---|
  | det_name = 'Eiger2 CdTe 4M' |
  | det_hms = 7.71     | [cm]  module size (horizontal)
