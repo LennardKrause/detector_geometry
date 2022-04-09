@@ -1,16 +1,9 @@
 # detector_geometry
 #### A tool to project resolution cones at different detector geometries (tilt, rotation, offset) at given X-ray energies.
-#### Main application is to visualize the maximum achievable resolution at a given geometry.
+ - Main application is to visualize the maximum achievable resolution at a given geometry.
+ - It uses python3, numpy and matplotlib
 
-#### It uses python3, numpy and matplotlib
-
-## Here's an example showing an Pilatus3 2M offset vertically:
-![Image](../main/Pilatus3_X_CdTe_2M.png)
-
-## And a rotated Eiger2 4M:
-![Image](../main/Eiger2_CdTe_4M.png)
-
-## Short how-to add a detector:
+## Short how-to:
 ### Edit the following sections in the *.py* file:
 
  |     Geometry      |   |
@@ -23,8 +16,11 @@
  | plt_unit = 'q'    | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
  | plt_origin = True | [bool] plot contour lines for original geometry?
 
-### Pilatus3 CdTe 2M Detector Specifications
- |     Geometry      |   |
+## To add a detector:
+ - add/change the following lines.
+ - comment/uncomment to change between
+
+ |  Specifications   |   |
  |-------------------|---|
  | det_name = 'Pilatus3 X CdTe 2M' |
  | det_hms = 8.38     | [cm]  module size (horizontal)
@@ -34,3 +30,9 @@
  | det_vgp = 17       | [pix] gap between modules (vertical)
  | det_hmn = 3        | [int] number of modules (horizontal)
  | det_vmn = 8        | [int] number of modules (vertical)
+
+## Here's an example showing an Pilatus3 2M offset vertically:
+![Image](../main/Pilatus3_X_CdTe_2M.png)
+
+## And a rotated Eiger2 4M:
+![Image](../main/Eiger2_CdTe_4M.png)
