@@ -2,7 +2,7 @@
 #### A tool to project resolution cones at different detector geometries (tilt, rotation, offset) and X-ray energies.
  - Main application is to visualize the maximum achievable resolution at a given geometry.
  - The math used is not meant to bring people to the moon but to provide a quick and simple preview.
- - Is designed for [Dectris](https://www.dectris.com) [Pilatus3](https://www.dectris.com/detectors/x-ray-detectors/pilatus3/) and [Eiger2](https://www.dectris.com/detectors/x-ray-detectors/eiger2/) Detectors.
+ - The module building code is designed for [Dectris](https://www.dectris.com) [Pilatus3](https://www.dectris.com/detectors/x-ray-detectors/pilatus3/) and [Eiger2](https://www.dectris.com/detectors/x-ray-detectors/eiger2/) Detectors.
  - It uses [python3](https://www.python.org), [numpy](https://numpy.org) and [matplotlib](https://matplotlib.org).
 
 ## Short how-to:
