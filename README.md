@@ -1,5 +1,5 @@
 # detector_geometry
-#### A tool to project resolution cones at different detector geometries (tilt, rotation, offset) at given X-ray energies.
+#### A tool to project resolution cones at different detector geometries (tilt, rotation, offset) and X-ray energies.
  - Main application is to visualize the maximum achievable resolution at a given geometry.
  - The math used is not meant to bring people to the moon but to provide a quick and simple preview.
  - It uses python3, numpy and matplotlib.
