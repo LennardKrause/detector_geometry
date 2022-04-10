@@ -12,7 +12,7 @@
  - add/change the detector specifications.
  - comment/uncomment to change between setups.
 
-## Here's an example showing an Pilatus3 2M offset vertically:
+## Here's an example showing a Pilatus3 2M offset vertically:
 
  |     Geometry      |   |
  |-------------------|---|
