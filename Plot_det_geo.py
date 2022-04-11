@@ -3,15 +3,15 @@ from matplotlib import pyplot as plt
 from matplotlib import cm, colors, patches
 
 # Geometry
-geo_det_family = 'Pilatus3 X CdTe' # [--] Pilatus3 / Eiger2
-geo_det_size = '2M'         # [--] 300K 1M 2M 6M / 1M 4M 9M 16M
-geo_dist = 17.6             # [cm]   Detector distance
-geo_tilt = 0.0              # [deg]  Detector tilt
-geo_rota = 0.0              # [deg]  detector rotation
-geo_yoff = 13.0             # [cm]   Detector offset (vertical)
-geo_energy = 35.0           # [keV]  Beam energy
-plt_unit = 'q'              # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
-plt_origin = True           # [bool] plot contour lines for original geometry?
+geo_det_family = 'Pilatus3 X CdTe' # [--]   Pilatus3      / Eiger2
+geo_det_size = '2M'                # [--]   300K 1M 2M 6M / 1M 4M 9M 16M
+geo_dist = 17.6                    # [cm]   Detector distance
+geo_tilt = 0.0                     # [deg]  Detector tilt
+geo_rota = 0.0                     # [deg]  detector rotation
+geo_yoff = 13.0                    # [cm]   Detector offset (vertical)
+geo_energy = 35.0                  # [keV]  Beam energy
+plt_unit = 'q'                     # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+plt_origin = True                  # [bool] plot contour lines for original geometry?
 
 # Detector Specifications
 if geo_det_family.startswith('Pilatus'):
