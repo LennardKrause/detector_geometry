@@ -47,8 +47,8 @@ def build_detector():
     # build detector modules
     for i in range(-det_hmn//2+det_hmn%2, det_hmn-det_hmn//2):
         for j in range(-det_vmn//2+det_vmn%2, det_vmn-det_vmn//2):
-            origin_x = i*(det_hms+det_hgp*det_pxs) - (det_hms/2)*(det_hmn%2) + (det_hgp*det_pxs)/2
-            origin_y = j*(det_vms+det_vgp*det_pxs) - (det_vms/2)*(det_vmn%2) + (det_vgp*det_pxs)/2
+            origin_x = i*(det_hms+det_hgp*det_pxs) - ((det_hms+det_hgp*det_pxs)/2)*(det_hmn%2) + (det_hgp*det_pxs)/2
+            origin_y = j*(det_vms+det_vgp*det_pxs) - ((det_vms+det_vgp*det_pxs)/2)*(det_vmn%2) + (det_vgp*det_pxs)/2
             ax.add_patch(patches.Rectangle((origin_x, origin_y),  det_hms, det_vms, color='black', alpha=0.25))
     # limit axes
     xdim = (det_hms * det_hmn + det_pxs * det_hgp * det_hmn) / 2
