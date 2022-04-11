@@ -3,13 +3,13 @@ from matplotlib import pyplot as plt
 from matplotlib import cm, colors, patches
 
 # Geometry
-geo_det_type = 'Pilatus3' # [--]   Pilatus3 / Eiger2
-geo_det_size = '2M'       # [--]   300K 1M 2M 6M / 1M 4M 9M 16M
-geo_dist = 10.0           # [cm]   Detector distance
+geo_det_type = 'Pilatus3 X CdTe' # [--]   Pilatus3 / Eiger2
+geo_det_size = '1M'       # [--]   300K 1M 2M 6M / 1M 4M 9M 16M
+geo_dist = 13.0           # [cm]   Detector distance
 geo_tilt = 0.0            # [deg]  Detector tilt
 geo_rota = 20.0           # [deg]  detector rotation
 geo_yoff = 0.0            # [cm]   Detector offset (vertical)
-geo_energy = 20.0         # [keV]  Beam energy
+geo_energy = 50.0         # [keV]  Beam energy
 plt_unit = 'd'            # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
 plt_origin = True         # [bool] plot contour lines for original geometry?
 
@@ -22,6 +22,9 @@ if geo_det_type.startswith('Pilatus'):
     det_hgp = 7       # [pix] gap between modules (horizontal)
     det_vgp = 17      # [pix] gap between modules (vertical)
     det_sizes = {'300K':(1,3),'1M':(2,5),'2M':(3,8),'6M':(5,12)}
+    if geo_det_size not in det_sizes.keys():
+        print('Unknown detector type/size combination!')
+        raise SystemExit
     det_hmn, det_vmn = det_sizes[geo_det_size]
 elif geo_det_type.startswith('Eiger'):
     det_name = f'{geo_det_type} {geo_det_size}'
@@ -31,6 +34,9 @@ elif geo_det_type.startswith('Eiger'):
     det_hgp = 38      # [pix] gap between modules (horizontal)
     det_vgp = 12      # [pix] gap between modules (vertical)
     det_sizes = {'1M':(1,2),'4M':(2,4),'9M':(3,6),'16M':(4,8)}
+    if geo_det_size not in det_sizes.keys():
+        print('Unknown detector type/size combination!')
+        raise SystemExit
     det_hmn, det_vmn = det_sizes[geo_det_size]
 else:
     # Add custom detector specs here
@@ -70,11 +76,6 @@ def build_detector():
             origin_x = i*(det_hms+det_hgp*det_pxs) - ((det_hms+det_hgp*det_pxs)/2)*(det_hmn%2) + (det_hgp*det_pxs)/2
             origin_y = j*(det_vms+det_vgp*det_pxs) - ((det_vms+det_vgp*det_pxs)/2)*(det_vmn%2) + (det_vgp*det_pxs)/2
             ax.add_patch(patches.Rectangle((origin_x, origin_y),  det_hms, det_vms, color=plt_module_color, alpha=plt_module_alpha))
-    # limit axes
-    xdim = (det_hms * det_hmn + det_pxs * det_hgp * det_hmn) / 2
-    ydim = (det_vms * det_vmn + det_pxs * det_vgp * det_vmn) / 2
-    ax.set_xlim(-xdim, xdim)
-    ax.set_ylim(-ydim, ydim)
     # draw contour lines
     for n,i in enumerate(plt_lines):
         # calculate resolution rings
@@ -136,6 +137,9 @@ plt_fig_ratio = xdim / ydim
 # init the plot
 fig = plt.figure(figsize=(plt_plot_size*plt_top_margin*plt_fig_ratio,plt_plot_size))
 ax = fig.add_subplot(111)
+# limit the axes
+ax.set_xlim(-xdim/2, xdim/2)
+ax.set_ylim(-ydim/2, ydim/2)
 # setup detector and geometry
 build_detector()
 # add title / information
