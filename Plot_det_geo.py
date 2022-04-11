@@ -50,7 +50,7 @@ else:
     det_vmn = 1       # [int] number of modules (vertical)
 
 # Plot Details
-plt_lines = np.logspace(-2, 1, num=25, base=10)/2
+plt_lines = np.logspace(-1, 1, num=25, base=10)/2
 plt_contour_fsize = 8
 plt_module_alpha = 0.25
 plt_module_color = 'black'
