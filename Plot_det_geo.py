@@ -117,7 +117,7 @@ ax = fig.add_subplot(111)
 # setup the geometry
 build_detector()
 # adjust and name the plot
-plt.suptitle(f'{det_name} | Energy: {geo_energy} keV | Distance: {geo_dist} cm\nRotation: {geo_rota}° | Tilt: {geo_tilt}° | Offset: {geo_yoff} cm | Units: {unit_names[plt_unit]}', size=10)
+plt.suptitle(f'$\\bf{det_name}$ | Energy: {geo_energy} keV | Distance: {geo_dist} cm\nRotation: {geo_rota}° | Tilt: {geo_tilt}° | Offset: {geo_yoff} cm | Units: {unit_names[plt_unit]}', size=10)
 ax.set_aspect('equal')
 plt.subplots_adjust(top=0.93, bottom=0, right=1, left=0, hspace=0, wspace=0)
 plt.axis('off')
