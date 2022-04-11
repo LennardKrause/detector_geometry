@@ -3,19 +3,19 @@ from matplotlib import pyplot as plt
 from matplotlib import cm, colors, patches
 
 # Geometry
-geo_det_family = 'Pilatus3 X CdTe' # [--]   Pilatus3      / Eiger2
-geo_det_size = '2M'                # [--]   300K 1M 2M 6M / 1M 4M 9M 16M
-geo_dist = 17.6                    # [cm]   Detector distance
-geo_tilt = 0.0                     # [deg]  Detector tilt
-geo_rota = 0.0                     # [deg]  detector rotation
-geo_yoff = 13.0                    # [cm]   Detector offset (vertical)
-geo_energy = 35.0                  # [keV]  Beam energy
-plt_unit = 'q'                     # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
-plt_origin = True                  # [bool] plot contour lines for original geometry?
+geo_det_type = 'Pilatus3' # [--]   Pilatus3 / Eiger2
+geo_det_size = '2M'       # [--]   300K 1M 2M 6M / 1M 4M 9M 16M
+geo_dist = 10.0           # [cm]   Detector distance
+geo_tilt = 0.0            # [deg]  Detector tilt
+geo_rota = 20.0           # [deg]  detector rotation
+geo_yoff = 0.0            # [cm]   Detector offset (vertical)
+geo_energy = 20.0         # [keV]  Beam energy
+plt_unit = 'd'            # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+plt_origin = True         # [bool] plot contour lines for original geometry?
 
 # Detector Specifications
-if geo_det_family.startswith('Pilatus'):
-    det_name = f'{geo_det_family} {geo_det_size}'
+if geo_det_type.startswith('Pilatus'):
+    det_name = f'{geo_det_type} {geo_det_size}'
     det_hms = 8.38    # [cm]  module size (horizontal)
     det_vms = 3.35    # [cm]  module size (vertical)
     det_pxs = 172e-4  # [cm]  pixel size
@@ -23,8 +23,8 @@ if geo_det_family.startswith('Pilatus'):
     det_vgp = 17      # [pix] gap between modules (vertical)
     det_sizes = {'300K':(1,3),'1M':(2,5),'2M':(3,8),'6M':(5,12)}
     det_hmn, det_vmn = det_sizes[geo_det_size]
-elif geo_det_family.startswith('Eiger'):
-    det_name = f'{geo_det_family} {geo_det_size}'
+elif geo_det_type.startswith('Eiger'):
+    det_name = f'{geo_det_type} {geo_det_size}'
     det_hms = 7.71    # [cm]  module size (horizontal)
     det_vms = 3.84    # [cm]  module size (vertical)
     det_pxs = 75e-4   # [cm]  pixel size
@@ -34,7 +34,7 @@ elif geo_det_family.startswith('Eiger'):
     det_hmn, det_vmn = det_sizes[geo_det_size]
 else:
     # Add custom detector specs here
-    det_name = f'{geo_det_family} {geo_det_size}'
+    det_name = f'{geo_det_type} {geo_det_size}'
     det_hms = 10.0    # [cm]  module size (horizontal)
     det_vms = 14.0    # [cm]  module size (vertical)
     det_pxs = 10e-4   # [cm]  pixel size
