@@ -9,56 +9,63 @@
  - Edit the geometry section in the *.py* file.
  - run it.
 
-## To add a detector:
- - add/change the detector specifications.
- - comment/uncomment to change between setups.
-
 ## Here's an example showing a Pilatus3 2M offset vertically:
 
- |     Geometry      |   |
- |-------------------|---|
- | geo_dist = 17.5   | [cm]   Detector distance
- | geo_tilt = 0.0    | [deg]  Detector tilt
- | geo_rota = 0.0    | [deg]  detector rotation
- | geo_yoff = 13.0   | [cm]   Detector offset (vertical)
- | geo_energy = 35.0 | [keV]  Beam energy
- | plt_unit = 'q'    | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | plt_origin = True | [bool] plot contour lines for original geometry?
- 
- |     Detector      |   |
- |-------------------|---|
- | det_name = 'Pilatus3 X CdTe 2M' |
- | det_hms = 8.38     | [cm]  module size (horizontal)
- | det_vms = 3.35     | [cm]  module size (vertical)
- | det_pxs = 172e-4   | [cm]  pixel size
- | det_hgp = 7        | [pix] gap between modules (horizontal)
- | det_vgp = 17       | [pix] gap between modules (vertical)
- | det_hmn = 3        | [int] number of modules (horizontal)
- | det_vmn = 8        | [int] number of modules (vertical)
+ |   Geometry   |        Value      | Hint |
+ |--------------|-------------------|------|
+ | geo_det_type | 'Pilatus3 X CdTe' | [str]  Pilatus3 / Eiger2
+ | geo_det_size | '2M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+ | geo_dist     | 17.5              | [cm]   Detector distance
+ | geo_tilt     | 0.0               | [deg]  Detector tilt
+ | geo_rota     | 0.0               | [deg]  detector rotation
+ | geo_yoff     | 13.0              | [cm]   Detector offset (vertical)
+ | geo_energy   | 35.0              | [keV]  Beam energy
+ | plt_unit     | 'q'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+ | plt_origin   | True              | [bool] plot contour lines for original geometry?
 
 ![Image](../main/Pilatus3_X_CdTe_2M.png)
 
 ## And a rotated Eiger2 4M:
 
- |     Geometry      |   |
- |-------------------|---|
- | geo_dist = 7.5    | [cm]   Detector distance
- | geo_tilt = 0.0    | [deg]  Detector tilt
- | geo_rota = 20.0   | [deg]  detector rotation
- | geo_yoff = 0.0    | [cm]   Detector offset (vertical)
- | geo_energy = 22.0 | [keV]  Beam energy
- | plt_unit = 'd'    | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | plt_origin = True | [bool] plot contour lines for original geometry?
- 
- |     Detector      |   |
- |-------------------|---|
- | det_name = 'Eiger2 CdTe 4M' |
- | det_hms = 7.71     | [cm]  module size (horizontal)
- | det_vms = 3.84     | [cm]  module size (vertical)
- | det_pxs = 75e-4    | [cm]  pixel size
- | det_hgp = 38       | [pix] gap between modules (horizontal)
- | det_vgp = 12       | [pix] gap between modules (vertical)
- | det_hmn = 2        | [int] number of modules (horizontal)
- | det_vmn = 4        | [int] number of modules (vertical)
+ |   Geometry   |        Value      | Hint |
+ |--------------|-------------------|------|
+ | geo_det_type | 'Eiger2 CdTe'     | [str]  Pilatus3 / Eiger2
+ | geo_det_size | '4M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+ | geo_dist     | 7.5               | [cm]   Detector distance
+ | geo_tilt     | 0.0               | [deg]  Detector tilt
+ | geo_rota     | 20.0              | [deg]  detector rotation
+ | geo_yoff     | 0.0               | [cm]   Detector offset (vertical)
+ | geo_energy   | 22.0              | [keV]  Beam energy
+ | plt_unit     | 'd'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+ | plt_origin   | True              | [bool] plot contour lines for original geometry?
  
 ![Image](../main/Eiger2_CdTe_4M.png)
+
+## To add a detector:
+ - add/change the detector specifications.
+ - Choose Name and Version (will be used in the figure title)
+ - Change "Add custom detector specs here" section
+
+ |   Geometry   |   Value   | Hint |
+ |--------------|-----------|------|
+ | geo_det_type | 'Name'    | [str]  Pilatus3 / Eiger2
+ | geo_det_size | 'Version' | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+ | geo_dist     | 6.0       | [cm]   Detector distance
+ | geo_tilt     | 0.0       | [deg]  Detector tilt
+ | geo_rota     | 0.0       | [deg]  detector rotation
+ | geo_yoff     | 0.0       | [cm]   Detector offset (vertical)
+ | geo_energy   | 17.0      | [keV]  Beam energy
+ | plt_unit     | 'd'       | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+ | plt_origin   | True      | [bool] plot contour lines for original geometry?
+
+ | Detector |       Value       | Hint |
+ |----------|-------------------|------|
+ | det_name | 'Name Version'    | [auto] generated
+ | det_hms  | 10.0              | [cm]   module size (horizontal)
+ | det_vms  | 14.0              | [cm]   module size (vertical)
+ | det_pxs  | 50e-4             | [cm]   pixel size
+ | det_hgp  | 0                 | [pix]  gap between modules (horizontal)
+ | det_vgp  | 0                 | [pix]  gap between modules (vertical)
+ | det_hmn  | 1                 | [int]  number of modules (horizontal)
+ | det_vmn  | 1                 | [int]  number of modules (vertical)
+ 
