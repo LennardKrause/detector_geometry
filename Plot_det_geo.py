@@ -77,7 +77,7 @@ def build_detector():
                 c0 = ax.contour(X, Y, Z, [geo_dist], colors='black', alpha=0.1)
                 # label original geometry contours
                 fmt = {c0.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
-                ax.clabel(c0, c0.levels, inline=True, fontsize=8, fmt=fmt, manual=[(50,100)])
+                ax.clabel(c0, c0.levels, inline=True, fontsize=8, fmt=fmt, manual=[(xdim,ydim)])
         
         # draw contours for the tilted/rotated/moved geometry
         X,Y,Z = create_cone(i, geo_rota, geo_tilt, geo_yoff)
@@ -86,7 +86,7 @@ def build_detector():
             c1 = ax.contour(X, Y, Z, [geo_dist], colors=colors.to_hex(plt_cmap((n+1)/len(plt_lines))))
             # label moved geometry contours
             fmt = {c1.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
-            ax.clabel(c1, c1.levels, inline=True, fontsize=8, fmt=fmt, manual=[( 0,100)])
+            ax.clabel(c1, c1.levels, inline=True, fontsize=8, fmt=fmt, manual=[( 0,ydim)])
 
 def create_cone(dim, rota, tilt, yoff):
     # creating grid
@@ -119,7 +119,7 @@ build_detector()
 # adjust and name the plot
 plt.suptitle(f'{det_name} | Energy: {geo_energy} keV | Distance: {geo_dist} cm\nRotation: {geo_rota}° | Tilt: {geo_tilt}° | Offset: {geo_yoff} cm | Units: {unit_names[plt_unit]}', size=10)
 ax.set_aspect('equal')
-plt.subplots_adjust(top=0.94, bottom=0, right=1, left=0, hspace=0, wspace=0)
+plt.subplots_adjust(top=0.93, bottom=0, right=1, left=0, hspace=0, wspace=0)
 plt.axis('off')
 plt.show()
 
