@@ -45,11 +45,13 @@ else:
 
 # Plot Details
 plt_lines = np.logspace(-2, 1, num=25, base=10)/2
-plt_cmap = cm.get_cmap('viridis_r')
 plt_contour_fsize = 8
 plt_module_alpha = 0.25
+plt_module_color = 'black'
 plt_cont_geom_alpha = 1.00
+plt_cont_geom_cmap = cm.get_cmap('viridis_r')
 plt_cont_orig_alpha = 0.10
+plt_cont_orig_color = 'black'
 plt_top_margin = 0.93
 plt_plot_size = 7
 
@@ -67,7 +69,7 @@ def build_detector():
         for j in range(-det_vmn//2+det_vmn%2, det_vmn-det_vmn//2):
             origin_x = i*(det_hms+det_hgp*det_pxs) - ((det_hms+det_hgp*det_pxs)/2)*(det_hmn%2) + (det_hgp*det_pxs)/2
             origin_y = j*(det_vms+det_vgp*det_pxs) - ((det_vms+det_vgp*det_pxs)/2)*(det_vmn%2) + (det_vgp*det_pxs)/2
-            ax.add_patch(patches.Rectangle((origin_x, origin_y),  det_hms, det_vms, color='black', alpha=plt_module_alpha))
+            ax.add_patch(patches.Rectangle((origin_x, origin_y),  det_hms, det_vms, color=plt_module_color, alpha=plt_module_alpha))
     # limit axes
     xdim = (det_hms * det_hmn + det_pxs * det_hgp * det_hmn) / 2
     ydim = (det_vms * det_vmn + det_pxs * det_vgp * det_vmn) / 2
@@ -91,7 +93,7 @@ def build_detector():
             # don't draw contour lines that are out of bounds
             # make sure Z is large enough to draw the contour
             if np.max(Z) >= geo_dist:
-                c0 = ax.contour(X, Y, Z, [geo_dist], colors='black', alpha=plt_cont_orig_alpha)
+                c0 = ax.contour(X, Y, Z, [geo_dist], colors=plt_cont_orig_color, alpha=plt_cont_orig_alpha)
                 # label original geometry contours
                 fmt = {c0.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
                 ax.clabel(c0, c0.levels, inline=True, fontsize=plt_contour_fsize, fmt=fmt, manual=[(xdim,ydim)])
@@ -99,7 +101,7 @@ def build_detector():
         X,Y,Z = create_cone(i, geo_rota, geo_tilt, geo_yoff)
         # make sure Z is large enough to draw the contour
         if np.max(Z) >= geo_dist:
-            c1 = ax.contour(X, Y, Z, [geo_dist], colors=colors.to_hex(plt_cmap((n+1)/len(plt_lines))), alpha=plt_cont_geom_alpha)
+            c1 = ax.contour(X, Y, Z, [geo_dist], colors=colors.to_hex(plt_cont_geom_cmap((n+1)/len(plt_lines))), alpha=plt_cont_geom_alpha)
             # label moved geometry contours
             fmt = {c1.levels[0]:f'{np.round(unit_dict[plt_unit],2):.2f}'}
             ax.clabel(c1, c1.levels, inline=True, fontsize=plt_contour_fsize, fmt=fmt, manual=[(0,ydim)])
