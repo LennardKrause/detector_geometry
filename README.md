@@ -8,6 +8,9 @@
 ## Short how-to:
  - Edit the geometry section in the *.py* file.
  - run it.
+#### Or
+ - run it.
+ - Use the interactive buttons & text inputs (plo.interactive = True)
 
 ## Here's an example showing a Pilatus3 2M offset vertically:
 
