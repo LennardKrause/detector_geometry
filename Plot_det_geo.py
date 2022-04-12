@@ -7,15 +7,15 @@ def get_specs():
     # Setup the geometry #
     ######################
     geo = container()
-    geo.det_type = 'Eiger2 CdTe' # [str] Pilatus3 / Eiger2
+    geo.det_type = 'Eiger2 CdTe' # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'          # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.dist = 8.0               # [cm]   Detector distance
     geo.tilt = 25.0              # [deg]  Detector tilt
-    geo.rota = 0.0               # [deg]  detector rotation
+    geo.rota = 0.0               # [deg]  Detector rotation
     geo.yoff = 6.0               # [cm]   Detector offset (vertical)
     geo.energy = 21.0            # [keV]  Beam energy
     geo.unit = 'd'               # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
-    geo.origin = True            # [bool] plot contour lines for original geometry?
+    geo.origin = True            # [bool] Plot contour lines for original geometry?
 
     ###########################
     # Detector Specifications #
@@ -25,11 +25,11 @@ def get_specs():
         ###############################
         # Specifications for Pilatus3 #
         ###############################
-        det.hms = 8.38    # [cm]  module size (horizontal)
-        det.vms = 3.35    # [cm]  module size (vertical)
-        det.pxs = 172e-4  # [cm]  pixel size
-        det.hgp = 7       # [pix] gap between modules (horizontal)
-        det.vgp = 17      # [pix] gap between modules (vertical)
+        det.hms = 8.38    # [cm]  Module size (horizontal)
+        det.vms = 3.35    # [cm]  Module size (vertical)
+        det.pxs = 172e-4  # [cm]  Pixel size
+        det.hgp = 7       # [pix] Gap between modules (horizontal)
+        det.vgp = 17      # [pix] Gap between modules (vertical)
         det.name = f'{geo.det_type} {geo.det_size}'
         det.sizes = {'300K':(1,3),'1M':(2,5),'2M':(3,8),'6M':(5,12)}
         if geo.det_size not in det.sizes.keys():
@@ -40,11 +40,11 @@ def get_specs():
         #############################
         # Specifications for Eiger2 #
         #############################
-        det.hms = 7.71    # [cm]  module size (horizontal)
-        det.vms = 3.84    # [cm]  module size (vertical)
-        det.pxs = 75e-4   # [cm]  pixel size
-        det.hgp = 38      # [pix] gap between modules (horizontal)
-        det.vgp = 12      # [pix] gap between modules (vertical)
+        det.hms = 7.71    # [cm]  Module size (horizontal)
+        det.vms = 3.84    # [cm]  Module size (vertical)
+        det.pxs = 75e-4   # [cm]  Pixel size
+        det.hgp = 38      # [pix] Gap between modules (horizontal)
+        det.vgp = 12      # [pix] Gap between modules (vertical)
         det.name = f'{geo.det_type} {geo.det_size}'
         det.sizes = {'1M':(1,2),'4M':(2,4),'9M':(3,6),'16M':(4,8)}
         if geo.det_size not in det.sizes.keys():
@@ -55,32 +55,32 @@ def get_specs():
         ###########################################
         # ADD CUSTOM DETECTOR SPECIFICATIONS HERE #
         ###########################################
-        det.hms = 10.0    # [cm]  module size (horizontal)
-        det.vms = 14.0    # [cm]  module size (vertical)
-        det.pxs = 10e-4   # [cm]  pixel size
-        det.hgp = 0       # [pix] gap between modules (horizontal)
-        det.vgp = 0       # [pix] gap between modules (vertical)
-        det.hmn = 1       # [int] number of modules (horizontal)
-        det.vmn = 1       # [int] number of modules (vertical)
+        det.hms = 10.0    # [cm]  Module size (horizontal)
+        det.vms = 14.0    # [cm]  Module size (vertical)
+        det.pxs = 10e-4   # [cm]  Pixel size
+        det.hgp = 0       # [pix] Gap between modules (horizontal)
+        det.vgp = 0       # [pix] Gap between modules (vertical)
+        det.hmn = 1       # [int] Number of modules (horizontal)
+        det.vmn = 1       # [int] Number of modules (vertical)
         det.name = f'{geo.det_type} {geo.det_size}'
 
     ################
     # Plot Details #
     ################
     plo = container()
-    plo.cont_levels = np.logspace(-1,1,num=25)/2  # contour levels
-    plo.cont_fsize = 8                            # contour label size
-    plo.cont_geom_alpha = 1.00                    # contour alpha (geometry)
-    plo.cont_geom_cmap = cm.get_cmap('viridis_r') # contour colormap (geometry)
-    plo.cont_orig_alpha = 0.10                    # contour alpha (original)
-    plo.cont_orig_color = 'black'                 # contour color (original)
-    plo.cont_reso = 500                           # contour steps (accuracy)
-    plo.cont_xmax = 50                            # max x/y for drawing contours
-    plo.module_alpha = 0.20                       # detector module alpha
-    plo.module_color = 'black'                    # detector module color
-    plo.margin_top = 0.93                         # plot margin for title
-    plo.plot_size = 7                             # plot size
-    plo.debug_3d = False                          # [bool] DEBUG plot 3D cones?
+    plo.cont_levels = np.logspace(-1,1,num=25)/2  # [list]  Contour levels
+    plo.cont_fsize = 8                            # [int]   Contour label size
+    plo.cont_geom_alpha = 1.00                    # [float] Contour alpha (geometry)
+    plo.cont_geom_cmap = cm.get_cmap('viridis_r') # [cmap]  Contour colormap (geometry)
+    plo.cont_orig_alpha = 0.10                    # [float] Contour alpha (original)
+    plo.cont_orig_color = 'black'                 # [color] Contour color (original)
+    plo.cont_reso = 500                           # [int]   Contour steps (accuracy)
+    plo.cont_xmax = 50                            # [int]   Max x/y for drawing contours
+    plo.module_alpha = 0.20                       # [float] Detector module alpha
+    plo.module_color = 'black'                    # [color] Detector module color
+    plo.margin_top = 0.93                         # [float] Plot margin for title
+    plo.plot_size = 7                             # [int]   Plot size
+    plo.debug_3d = False                          # [bool]  DEBUG plot 3D cones?
 
     ###################################
     # !!! Don't change below here !!! #
