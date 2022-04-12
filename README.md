@@ -6,10 +6,10 @@
  - It uses [python3](https://www.python.org), [numpy](https://numpy.org) and [matplotlib](https://matplotlib.org).
 
 ## Short how-to:
- - Edit the geometry section in the *.py* file.
- - run it.
+ - Edit the geometry section in the *.py* file
+ - run it
 #### Or
- - run it (plo.interactive = True).
+ - run it (plo.interactive = True)
  - Use the text input (top right) to change geometry:
    - D: Detector distance [cm]
    - T: Tilt [˚]
