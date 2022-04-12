@@ -70,7 +70,7 @@ def get_specs():
     # Plot Details #
     ################
     plo = container()
-    plo.cont_levels = np.logspace(-1,1,num=10)/2  # [list]  Contour levels
+    plo.cont_levels = np.logspace(-1,1,num=15)/2  # [list]  Contour levels
     plo.cont_fsize = 8                            # [int]   Contour label size
     plo.cont_geom_alpha = 1.00                    # [float] Contour alpha (geometry)
     plo.cont_geom_cmap = cm.get_cmap('viridis_r') # [cmap]  Contour colormap (geometry)
