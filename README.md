@@ -9,8 +9,17 @@
  - Edit the geometry section in the *.py* file.
  - run it.
 #### Or
- - run it.
- - Use the interactive buttons & text inputs (plo.interactive = True)
+ - run it (plo.interactive = True).
+ - Use the text input (top right) to change geometry:
+   - D: Detector distance [cm]
+   - T: Tilt [˚]
+   - O: Offset [cm]
+   - R: Rotation [˚]
+ - And the radio buttons (top left) to change the unit:
+   - d: d-space
+   - t: 2-theta
+   - q: q-space
+   - s: sin(theta)/lambda
 
 ## Here's an example showing a Pilatus3 2M offset vertically:
 
