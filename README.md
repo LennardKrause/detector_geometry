@@ -3,19 +3,19 @@
  - Main application is to visualize the maximum achievable resolution at a given geometry.
  - The math used is not meant to bring people to the moon but to provide a quick and simple preview.
  - The module building code is designed for [Dectris](https://www.dectris.com) [Pilatus3](https://www.dectris.com/detectors/x-ray-detectors/pilatus3/) and [Eiger2](https://www.dectris.com/detectors/x-ray-detectors/eiger2/) Detectors but one-module systems like the [Bruker](https://www.bruker.com/en.html) [Photon II](https://www.bruker.com/en/products-and-solutions/diffractometers-and-scattering-systems/single-crystal-x-ray-diffractometers/sc-xrd-components/detectors.html) are possible as well.
- - It uses [python3](https://www.python.org), [numpy](https://numpy.org) and [matplotlib](https://matplotlib.org).
+ - It uses [python3](https://www.python.org), [numpy](https://numpy.org) and [matplotlib 3.5.1](https://matplotlib.org).
 
 ## Short how-to:
  - Edit the geometry section in the *.py* file
  - run it
 #### Or
  - run it (plo.interactive = True)
- - Use the text input (top right) to change geometry:
-   - D: Detector distance [cm]
-   - T: Tilt [˚]
-   - O: Offset [cm]
-   - R: Rotation [˚]
- - And the radio buttons (top left) to change the unit:
+ - Use the (highly unsatisfying) text input to change geometry:
+   - Detector [cm]
+   - Tilt [˚]
+   - Offset [cm]
+   - Rotation [˚]
+ - And the (slightly better) radio buttons (top left) to change the unit:
    - d: d-space
    - t: 2-theta
    - q: q-space
