@@ -107,7 +107,13 @@ def main():
     plo.fig_ratio = plo.xdim / plo.ydim
     # init the plot
     fig = plt.figure(figsize=(plo.plot_size * plo.margin_top * plo.fig_ratio, plo.plot_size))
+    # needed to avoid the following warning:
+    # MatplotlibDeprecationWarning: Toggling axes navigation from the keyboard is deprecated
+    # since 3.3 and will be removed two minor releases later.
+    fig.canvas.mpl_disconnect(fig.canvas.manager.key_press_handler_id)
+    # add axis for the detector modules
     bg = fig.add_subplot(111, aspect='equal')
+    # add axis for the contours
     ax = fig.add_subplot(111, aspect='equal')
     # remove the axis
     bg.set_axis_off()
