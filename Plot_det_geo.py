@@ -110,7 +110,7 @@ def main():
     # needed to avoid the following warning:
     # MatplotlibDeprecationWarning: Toggling axes navigation from the keyboard is deprecated
     # since 3.3 and will be removed two minor releases later.
-    fig.canvas.mpl_disconnect(fig.canvas.manager.key_press_handler_id)
+    #fig.canvas.mpl_disconnect(fig.canvas.manager.key_press_handler_id)
     # add axis for the detector modules
     bg = fig.add_subplot(111, aspect='equal')
     # add axis for the contours
@@ -133,16 +133,43 @@ def main():
     plt.subplots_adjust(top=plo.margin_top, bottom=0, right=1, left=0, hspace=0, wspace=0)
     # generate some sense of interactivity
     if plo.interactive:
-        box_unit = RadioButtons(fig.add_axes([0.0, 0.92, 0.09, 0.09], frameon=False), ('t','d','q','s'), active=1, activecolor=u'#1f77b4')
+        # cut the title to make room for the text boxes
+        plt.suptitle(f'{det.name}', size=10)
+        # add an axis for the radio buttons
+        axs_unit = fig.add_axes([0.0, 0.92, 0.09, 0.09], frameon=False)
+        # put the buttons in the axis
+        box_unit = RadioButtons(axs_unit, ('t','d','q','s'), active=1, activecolor=u'#1f77b4')
+        # update the plot on click
         box_unit.on_clicked(lambda val: update_plot('unit', val, fig, geo, plo, det, ax))
-        box_dist = TextBox(fig.add_axes([0.86, 0.96, 0.10, 0.03], frameon=False), 'D:', initial=geo.dist)
+        # make a new axis for the TextBox
+        axs_ener = fig.add_axes([0.20, 0.93, 0.06, 0.03], frameon=False)
+        # add the box with label and initial value
+        box_ener = TextBox(axs_ener, 'Energy:', initial=geo.energy)
+        # update the plot on submit (press enter or leaving the box)
+        box_ener.on_submit(lambda val: update_plot('energy', val, fig, geo, plo, det, ax))
+        # make the TextBox respond to changing text
+        box_ener.on_text_change(lambda val: update_box(box_tilt, val))
+        # and distance
+        axs_dist = fig.add_axes([0.40, 0.93, 0.06, 0.03], frameon=False)
+        box_dist = TextBox(axs_dist, 'Distance:', initial=geo.dist)
         box_dist.on_submit(lambda val: update_plot('dist', val, fig, geo, plo, det, ax))
-        box_rota = TextBox(fig.add_axes([0.86, 0.93, 0.10, 0.03], frameon=False), 'R:', initial=geo.rota)
+        box_dist.on_text_change(lambda val: update_box(box_dist, val))
+        # proceed with rotation
+        axs_rota = fig.add_axes([0.60, 0.93, 0.06, 0.03], frameon=False)
+        box_rota = TextBox(axs_rota, 'Rotation:', initial=geo.rota)
         box_rota.on_submit(lambda val: update_plot('rota', val, fig, geo, plo, det, ax))
-        box_yoff = TextBox(fig.add_axes([0.94, 0.96, 0.10, 0.03], frameon=False), 'O:', initial=geo.yoff)
+        box_rota.on_text_change(lambda val: update_box(box_rota, val))
+        # and offset
+        axs_yoff = fig.add_axes([0.75, 0.93, 0.06, 0.03], frameon=False)
+        box_yoff = TextBox(axs_yoff, 'Offset:', initial=geo.yoff)
         box_yoff.on_submit(lambda val: update_plot('yoff', val, fig, geo, plo, det, ax))
-        box_tilt = TextBox(fig.add_axes([0.94, 0.93, 0.10, 0.03], frameon=False), 'T:', initial=geo.tilt)
+        box_yoff.on_text_change(lambda val: update_box(box_yoff, val))
+        # and tilt
+        axs_tilt = fig.add_axes([0.90, 0.93, 0.06, 0.03], frameon=False)
+        box_tilt = TextBox(axs_tilt, 'Tilt:', initial=geo.tilt)
         box_tilt.on_submit(lambda val: update_plot('tilt', val, fig, geo, plo, det, ax))
+        box_tilt.on_text_change(lambda val: update_box(box_tilt, val))
+
     # show the plot
     plt.show()
     # plot the 3d cones?
@@ -225,19 +252,22 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
         geo.yoff = float(val)
     elif nam == 'unit':
         geo.unit = str(val)
-    # remove the individual artists via full clear
-    # individual removing via ax.collections and
-    # ax.artists didn't work
-    ax.cla()
-    ax.set_aspect('equal')
-    ax.set_axis_off()
-    ax.set_xlim(-plo.xdim/2, plo.xdim/2)
-    ax.set_ylim(-plo.ydim/2, plo.ydim/2)
+    elif nam == 'energy':
+        geo.energy = float(val)
+    # remove contour lines
+    for _ in ax.collections:
+        ax.collections.pop()
+    # remove contour labels
+    for _ in ax.texts:
+        ax.texts.pop()
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
-    plt.suptitle(f'{det.name} | Energy: {geo.energy} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {geo.unit_names[geo.unit]}', size=10)
-    fig.canvas.draw()
+    plt.suptitle(f'{det.name}', size=10)
+    fig.canvas.blit(ax)
     fig.canvas.flush_events()
+
+def update_box(box, val):
+    box.canvas.blit()
 
 def plot_3d(geo, plo):
     #####################################################
@@ -246,9 +276,7 @@ def plot_3d(geo, plo):
     #####################################################
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    #plt_cont_levels = [0.01, 0.10, 0.20, 0.30, 0.39, 0.42, 0.45, 0.49, 0.53, 0.58, 0.65, 0.75, 0.87, 1.00, 1.16, 1.50, 2.00, 3.00, 5.00, 10.00]
     for n,i in enumerate(plo.cont_levels[-3:]):
-        #ax.plot_surface(*create_cone(i, geo_tilt, geo_yoff), alpha=0.25)
         ax.plot_wireframe(*create_cone(i, 0, 0, 0, geo.dist, plo.cont_xmax, plo.cont_reso), alpha=0.1, colors='gray')
         ax.contour(*create_cone(i, 0, 0, 0, geo.dist, plo.cont_xmax, plo.cont_reso), [geo.dist], alpha=0.1, colors='gray')
         ax.plot_wireframe(*create_cone(i, geo.rota, geo.tilt, geo.yoff, geo.dist, plo.cont_xmax, plo.cont_reso), alpha=0.25, colors='red')
