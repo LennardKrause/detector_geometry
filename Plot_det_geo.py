@@ -1,5 +1,5 @@
 import numpy as np
-from matplotlib.widgets import TextBox
+from matplotlib.widgets import TextBox, RadioButtons
 from matplotlib import pyplot as plt
 plt.rcParams['savefig.dpi'] = 300
 from matplotlib import cm, colors, patches
@@ -94,10 +94,10 @@ def main():
     # fetch the geometry, detector and plot specifications
     geo, det, plo = get_specs()
     # translate unit for plot title
-    geo.unit_names = {'t':'2-Theta',
-                      'd':'d-spacing',
-                      'q':'q-space',
-                      's':'sin(Theta)/lambda'}
+    geo.unit_names = {'t':r'2-$\Theta$',
+                      'd':r'$d_{space}$',
+                      'q':r'$q_{space}$',
+                      's':r'$sin(\Theta)/\lambda$'}
     if geo.unit not in geo.unit_names.keys():
         print('Unknown contour label unit!')
         raise SystemExit
@@ -107,11 +107,8 @@ def main():
     plo.fig_ratio = plo.xdim / plo.ydim
     # init the plot
     fig = plt.figure(figsize=(plo.plot_size * plo.margin_top * plo.fig_ratio, plo.plot_size))
-    bg = fig.add_subplot(111)
-    ax = fig.add_subplot(111)
-    # fix the aspect
-    bg.set_aspect('equal')
-    ax.set_aspect('equal')
+    bg = fig.add_subplot(111, aspect='equal')
+    ax = fig.add_subplot(111, aspect='equal')
     # remove the axis
     bg.set_axis_off()
     ax.set_axis_off()
@@ -130,15 +127,15 @@ def main():
     plt.subplots_adjust(top=plo.margin_top, bottom=0, right=1, left=0, hspace=0, wspace=0)
     # generate some sense of interactivity
     if plo.interactive:
-        box_unit = TextBox(fig.add_axes([0.08, 0.13, 0.10, 0.025], frameon=False), 'Unit: ', initial=geo.unit)
-        box_unit.on_submit(lambda val: update_plot('unit', val, fig, geo, plo, det, ax))
-        box_dist = TextBox(fig.add_axes([0.08, 0.10, 0.10, 0.025], frameon=False, fc='gray'), 'Dist: ', initial=geo.dist)
+        box_unit = RadioButtons(fig.add_axes([0.0, 0.92, 0.09, 0.09], frameon=False), ('t','d','q','s'), active=1, activecolor=u'#1f77b4')
+        box_unit.on_clicked(lambda val: update_plot('unit', val, fig, geo, plo, det, ax))
+        box_dist = TextBox(fig.add_axes([0.86, 0.96, 0.10, 0.03], frameon=False), 'D:', initial=geo.dist)
         box_dist.on_submit(lambda val: update_plot('dist', val, fig, geo, plo, det, ax))
-        box_rota = TextBox(fig.add_axes([0.08, 0.07, 0.10, 0.025], frameon=False), 'Rota: ', initial=geo.rota)
+        box_rota = TextBox(fig.add_axes([0.86, 0.93, 0.10, 0.03], frameon=False), 'R:', initial=geo.rota)
         box_rota.on_submit(lambda val: update_plot('rota', val, fig, geo, plo, det, ax))
-        box_yoff = TextBox(fig.add_axes([0.08, 0.04, 0.10, 0.025], frameon=False), 'YOff: ', initial=geo.yoff)
+        box_yoff = TextBox(fig.add_axes([0.94, 0.96, 0.10, 0.03], frameon=False), 'Y:', initial=geo.yoff)
         box_yoff.on_submit(lambda val: update_plot('yoff', val, fig, geo, plo, det, ax))
-        box_tilt = TextBox(fig.add_axes([0.08, 0.01, 0.10, 0.025], frameon=False), 'Tilt: ', initial=geo.tilt)
+        box_tilt = TextBox(fig.add_axes([0.94, 0.93, 0.10, 0.03], frameon=False), 'T:', initial=geo.tilt)
         box_tilt.on_submit(lambda val: update_plot('tilt', val, fig, geo, plo, det, ax))
     # show the plot
     plt.show()
@@ -208,10 +205,10 @@ def create_cone(dim, rota, tilt, yoff, geo_dist, plt_cont_xmax, plt_cont_reso):
     return Y,X+comp-yoff,Z
 
 def update_plot(nam, val, fig, geo, plo, det, ax):
-    #####################################################
-    #    This is a sloppy, hacky way to achieve some    #
-    # interactivity withour building a GUI to handle it #
-    #####################################################
+    ##################################################
+    # This is a sloppy and hacky way to achieve some #
+    #   interactivity without building a proper GUI  #
+    ##################################################
     if nam == 'dist':
         geo.dist = float(val)
     elif nam == 'rota':
@@ -222,8 +219,9 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
         geo.yoff = float(val)
     elif nam == 'unit':
         geo.unit = str(val)
-    # hacky, removing the individual artists via
-    # ax.collections and ax.artists didn't work
+    # remove the individual artists via full clear
+    # individual removing via ax.collections and
+    # ax.artists didn't work
     ax.cla()
     ax.set_aspect('equal')
     ax.set_axis_off()
