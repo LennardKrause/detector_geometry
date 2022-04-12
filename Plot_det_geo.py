@@ -1,5 +1,7 @@
 import numpy as np
+from matplotlib.widgets import TextBox
 from matplotlib import pyplot as plt
+plt.rcParams['savefig.dpi'] = 300
 from matplotlib import cm, colors, patches
 
 def get_specs():
@@ -68,18 +70,19 @@ def get_specs():
     # Plot Details #
     ################
     plo = container()
-    plo.cont_levels = np.logspace(-1,1,num=25)/2  # [list]  Contour levels
+    plo.cont_levels = np.logspace(-1,1,num=10)/2  # [list]  Contour levels
     plo.cont_fsize = 8                            # [int]   Contour label size
     plo.cont_geom_alpha = 1.00                    # [float] Contour alpha (geometry)
     plo.cont_geom_cmap = cm.get_cmap('viridis_r') # [cmap]  Contour colormap (geometry)
-    plo.cont_orig_alpha = 0.10                    # [float] Contour alpha (original)
-    plo.cont_orig_color = 'black'                 # [color] Contour color (original)
+    plo.cont_orig_alpha = 0.25                    # [float] Contour alpha (original)
+    plo.cont_orig_color = 'gray'                  # [color] Contour color (original)
     plo.cont_reso = 500                           # [int]   Contour steps (accuracy)
     plo.cont_xmax = 50                            # [int]   Max x/y for drawing contours
     plo.module_alpha = 0.20                       # [float] Detector module alpha
-    plo.module_color = 'black'                    # [color] Detector module color
+    plo.module_color = 'gray'                     # [color] Detector module color
     plo.margin_top = 0.93                         # [float] Plot margin for title
     plo.plot_size = 7                             # [int]   Plot size
+    plo.interactive = True                        # [bool]  Make the plot interactive
     plo.debug_3d = False                          # [bool]  DEBUG plot 3D cones?
 
     ###################################
@@ -91,11 +94,11 @@ def main():
     # fetch the geometry, detector and plot specifications
     geo, det, plo = get_specs()
     # translate unit for plot title
-    unit_names = {'t':'2-Theta',
-                  'd':'d-spacing',
-                  'q':'q-space',
-                  's':'sin(Theta)/lambda'}
-    if geo.unit not in unit_names.keys():
+    geo.unit_names = {'t':'2-Theta',
+                      'd':'d-spacing',
+                      'q':'q-space',
+                      's':'sin(Theta)/lambda'}
+    if geo.unit not in geo.unit_names.keys():
         print('Unknown contour label unit!')
         raise SystemExit
     # figure out proper plot dimensions
@@ -104,26 +107,46 @@ def main():
     plo.fig_ratio = plo.xdim / plo.ydim
     # init the plot
     fig = plt.figure(figsize=(plo.plot_size * plo.margin_top * plo.fig_ratio, plo.plot_size))
+    bg = fig.add_subplot(111)
     ax = fig.add_subplot(111)
+    # fix the aspect
+    bg.set_aspect('equal')
+    ax.set_aspect('equal')
+    # remove the axis
+    bg.set_axis_off()
+    ax.set_axis_off()
     # limit the axes
+    bg.set_xlim(-plo.xdim/2, plo.xdim/2)
     ax.set_xlim(-plo.xdim/2, plo.xdim/2)
+    bg.set_ylim(-plo.ydim/2, plo.ydim/2)
     ax.set_ylim(-plo.ydim/2, plo.ydim/2)
     # setup detector and geometry
-    build_detector(ax, det, plo)
+    build_detector(bg, det, plo)
     # create cones and draw contour lines
     draw_contours(ax, geo, plo)
     # add title / information
-    plt.suptitle(f'{det.name} | Energy: {geo.energy} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {unit_names[geo.unit]}', size=10)
+    plt.suptitle(f'{det.name} | Energy: {geo.energy} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {geo.unit_names[geo.unit]}', size=10)
     # adjust the margins
     plt.subplots_adjust(top=plo.margin_top, bottom=0, right=1, left=0, hspace=0, wspace=0)
-    ax.set_aspect('equal')
-    plt.axis('off')
+    # generate some sense of interactivity
+    if plo.interactive:
+        box_unit = TextBox(fig.add_axes([0.08, 0.13, 0.10, 0.025], frameon=False), 'Unit: ', initial=geo.unit)
+        box_unit.on_submit(lambda val: update_plot('unit', val, fig, geo, plo, det, ax))
+        box_dist = TextBox(fig.add_axes([0.08, 0.10, 0.10, 0.025], frameon=False, fc='gray'), 'Dist: ', initial=geo.dist)
+        box_dist.on_submit(lambda val: update_plot('dist', val, fig, geo, plo, det, ax))
+        box_rota = TextBox(fig.add_axes([0.08, 0.07, 0.10, 0.025], frameon=False), 'Rota: ', initial=geo.rota)
+        box_rota.on_submit(lambda val: update_plot('rota', val, fig, geo, plo, det, ax))
+        box_yoff = TextBox(fig.add_axes([0.08, 0.04, 0.10, 0.025], frameon=False), 'YOff: ', initial=geo.yoff)
+        box_yoff.on_submit(lambda val: update_plot('yoff', val, fig, geo, plo, det, ax))
+        box_tilt = TextBox(fig.add_axes([0.08, 0.01, 0.10, 0.025], frameon=False), 'Tilt: ', initial=geo.tilt)
+        box_tilt.on_submit(lambda val: update_plot('tilt', val, fig, geo, plo, det, ax))
+    # show the plot
     plt.show()
     # plot the 3d cones?
     if plo.debug_3d:
         plot_3d(geo, plo)
 
-def build_detector(ax, det, plo):
+def build_detector(bg, det, plo):
     # build detector modules
     # beam position is between the modules (even) or at the center module (odd)
     # determined by the "+det.hmn%2" part
@@ -134,7 +157,7 @@ def build_detector(ax, det, plo):
             # and "det.hmn%2" makes sure this is only active for detectors with an odd number of modules
             origin_x = i*(det.hms+det.hgp*det.pxs) - ((det.hms+det.hgp*det.pxs)/2)*(det.hmn%2) + (det.hgp*det.pxs)/2
             origin_y = j*(det.vms+det.vgp*det.pxs) - ((det.vms+det.vgp*det.pxs)/2)*(det.vmn%2) + (det.vgp*det.pxs)/2
-            ax.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
+            bg.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
 
 def draw_contours(ax, geo, plo):
     # draw contour lines
@@ -184,6 +207,34 @@ def create_cone(dim, rota, tilt, yoff, geo_dist, plt_cont_xmax, plt_cont_reso):
     comp = np.deg2rad(tilt) * geo_dist
     return Y,X+comp-yoff,Z
 
+def update_plot(nam, val, fig, geo, plo, det, ax):
+    #####################################################
+    #    This is a sloppy, hacky way to achieve some    #
+    # interactivity withour building a GUI to handle it #
+    #####################################################
+    if nam == 'dist':
+        geo.dist = float(val)
+    elif nam == 'rota':
+        geo.rota = float(val)
+    elif nam == 'tilt':
+        geo.tilt = float(val)
+    elif nam == 'yoff':
+        geo.yoff = float(val)
+    elif nam == 'unit':
+        geo.unit = str(val)
+    # hacky, removing the individual artists via
+    # ax.collections and ax.artists didn't work
+    ax.cla()
+    ax.set_aspect('equal')
+    ax.set_axis_off()
+    ax.set_xlim(-plo.xdim/2, plo.xdim/2)
+    ax.set_ylim(-plo.ydim/2, plo.ydim/2)
+    # re-calculate cones and re-draw contours
+    draw_contours(ax, geo, plo)
+    plt.suptitle(f'{det.name} | Energy: {geo.energy} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {geo.unit_names[geo.unit]}', size=10)
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+
 def plot_3d(geo, plo):
     #####################################################
     # - debug - debug - debug - debug - debug - debug - #
@@ -196,10 +247,8 @@ def plot_3d(geo, plo):
         #ax.plot_surface(*create_cone(i, geo_tilt, geo_yoff), alpha=0.25)
         ax.plot_wireframe(*create_cone(i, 0, 0, 0, geo.dist, plo.cont_xmax, plo.cont_reso), alpha=0.1, colors='gray')
         ax.contour(*create_cone(i, 0, 0, 0, geo.dist, plo.cont_xmax, plo.cont_reso), [geo.dist], alpha=0.1, colors='gray')
-
         ax.plot_wireframe(*create_cone(i, geo.rota, geo.tilt, geo.yoff, geo.dist, plo.cont_xmax, plo.cont_reso), alpha=0.25, colors='red')
         ax.contour(*create_cone(i, geo.rota, geo.tilt, geo.yoff, geo.dist, plo.cont_xmax, plo.cont_reso), [geo.dist], colors='red')
-
     ax.set_xlim(-plo.cont_xmax/2, plo.cont_xmax/2)
     ax.set_ylim(-plo.cont_xmax/2, plo.cont_xmax/2)
     ax.set_zlim(0, geo.dist)
