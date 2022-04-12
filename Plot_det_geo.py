@@ -12,9 +12,9 @@ def get_specs():
     geo.det_type = 'Eiger2 CdTe' # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'          # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.dist = 8.0               # [cm]   Detector distance
-    geo.tilt = 25.0              # [deg]  Detector tilt
+    geo.tilt = 0.0               # [deg]  Detector tilt
     geo.rota = 0.0               # [deg]  Detector rotation
-    geo.yoff = 6.0               # [cm]   Detector offset (vertical)
+    geo.yoff = 0.0               # [cm]   Detector offset (vertical)
     geo.energy = 21.0            # [keV]  Beam energy
     geo.unit = 'd'               # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
     geo.origin = True            # [bool] Plot contour lines for original geometry?
@@ -94,10 +94,10 @@ def main():
     # fetch the geometry, detector and plot specifications
     geo, det, plo = get_specs()
     # translate unit for plot title
-    geo.unit_names = {'t':r'2-$\Theta$',
+    geo.unit_names = {'t':r'2$\theta$',
                       'd':r'$d_{space}$',
                       'q':r'$q_{space}$',
-                      's':r'$sin(\Theta)/\lambda$'}
+                      's':r'$sin(\theta)/\lambda$'}
     if geo.unit not in geo.unit_names.keys():
         print('Unknown contour label unit!')
         raise SystemExit
@@ -133,7 +133,7 @@ def main():
         box_dist.on_submit(lambda val: update_plot('dist', val, fig, geo, plo, det, ax))
         box_rota = TextBox(fig.add_axes([0.86, 0.93, 0.10, 0.03], frameon=False), 'R:', initial=geo.rota)
         box_rota.on_submit(lambda val: update_plot('rota', val, fig, geo, plo, det, ax))
-        box_yoff = TextBox(fig.add_axes([0.94, 0.96, 0.10, 0.03], frameon=False), 'Y:', initial=geo.yoff)
+        box_yoff = TextBox(fig.add_axes([0.94, 0.96, 0.10, 0.03], frameon=False), 'O:', initial=geo.yoff)
         box_yoff.on_submit(lambda val: update_plot('yoff', val, fig, geo, plo, det, ax))
         box_tilt = TextBox(fig.add_axes([0.94, 0.93, 0.10, 0.03], frameon=False), 'T:', initial=geo.tilt)
         box_tilt.on_submit(lambda val: update_plot('tilt', val, fig, geo, plo, det, ax))
