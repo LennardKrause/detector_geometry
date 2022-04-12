@@ -264,7 +264,6 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
     draw_contours(ax, geo, plo)
     plt.suptitle(f'{det.name}', size=10)
     fig.canvas.blit(ax)
-    fig.canvas.flush_events()
 
 def update_box(box, val):
     box.canvas.blit()
