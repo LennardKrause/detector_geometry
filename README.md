@@ -13,15 +13,15 @@
 
  |   Geometry   |        Value      | Hint |
  |--------------|-------------------|------|
- | geo_det_type | 'Pilatus3 X CdTe' | [str]  Pilatus3 / Eiger2
- | geo_det_size | '2M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
- | geo_dist     | 17.5              | [cm]   Detector distance
- | geo_tilt     | 0.0               | [deg]  Detector tilt
- | geo_rota     | 0.0               | [deg]  detector rotation
- | geo_yoff     | 13.0              | [cm]   Detector offset (vertical)
- | geo_energy   | 35.0              | [keV]  Beam energy
- | geo_unit     | 'q'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | geo_origin   | True              | [bool] plot contour lines for original geometry?
+ | geo.det_type | 'Pilatus3 X CdTe' | [str]  Pilatus3 / Eiger2
+ | geo.det_size | '2M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+ | geo.dist     | 17.5              | [cm]   Detector distance
+ | geo.tilt     | 0.0               | [deg]  Detector tilt
+ | geo.rota     | 0.0               | [deg]  detector rotation
+ | geo.yoff     | 13.0              | [cm]   Detector offset (vertical)
+ | geo.energy   | 35.0              | [keV]  Beam energy
+ | geo.unit     | 'q'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+ | geo.origin   | True              | [bool] plot contour lines for original geometry?
 
 ![Image](../main/Pilatus3_X_CdTe_2M.png)
 
@@ -29,15 +29,15 @@
 
  |   Geometry   |        Value      | Hint |
  |--------------|-------------------|------|
- | geo_det_type | 'Eiger2 CdTe'     | [str]  Pilatus3 / Eiger2
- | geo_det_size | '4M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
- | geo_dist     | 7.5               | [cm]   Detector distance
- | geo_tilt     | 0.0               | [deg]  Detector tilt
- | geo_rota     | 20.0              | [deg]  detector rotation
- | geo_yoff     | 0.0               | [cm]   Detector offset (vertical)
- | geo_energy   | 22.0              | [keV]  Beam energy
- | geo_unit     | 'd'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | geo_origin   | True              | [bool] plot contour lines for original geometry?
+ | geo.det_type | 'Eiger2 CdTe'     | [str]  Pilatus3 / Eiger2
+ | geo.det_size | '4M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+ | geo.dist     | 7.5               | [cm]   Detector distance
+ | geo.tilt     | 0.0               | [deg]  Detector tilt
+ | geo.rota     | 20.0              | [deg]  detector rotation
+ | geo.yoff     | 0.0               | [cm]   Detector offset (vertical)
+ | geo.energy   | 22.0              | [keV]  Beam energy
+ | geo.unit     | 'd'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+ | geo.origin   | True              | [bool] plot contour lines for original geometry?
  
 ![Image](../main/Eiger2_CdTe_4M.png)
 
@@ -48,24 +48,24 @@
 
  |   Geometry   |   Value   | Hint |
  |--------------|-----------|------|
- | geo_det_type | 'Name'    | [str]  Pilatus3 / Eiger2
- | geo_det_size | 'Version' | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
- | geo_dist     | 6.0       | [cm]   Detector distance
- | geo_tilt     | 0.0       | [deg]  Detector tilt
- | geo_rota     | 0.0       | [deg]  detector rotation
- | geo_yoff     | 0.0       | [cm]   Detector offset (vertical)
- | geo_energy   | 17.0      | [keV]  Beam energy
- | geo_unit     | 'd'       | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | geo_origin   | True      | [bool] plot contour lines for original geometry?
+ | geo.det_type | 'Name'    | [str]  Pilatus3 / Eiger2
+ | geo.det_size | 'Version' | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+ | geo.dist     | 6.0       | [cm]   Detector distance
+ | geo.tilt     | 0.0       | [deg]  Detector tilt
+ | geo.rota     | 0.0       | [deg]  detector rotation
+ | geo.yoff     | 0.0       | [cm]   Detector offset (vertical)
+ | geo.energy   | 17.0      | [keV]  Beam energy
+ | geo.unit     | 'd'       | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+ | geo.origin   | True      | [bool] plot contour lines for original geometry?
 
  | Detector |       Value       | Hint |
  |----------|-------------------|------|
- | det_name | 'Name Version'    | [auto] generated
- | det_hms  | 10.0              | [cm]   module size (horizontal)
- | det_vms  | 14.0              | [cm]   module size (vertical)
- | det_pxs  | 50e-4             | [cm]   pixel size
- | det_hgp  | 0                 | [pix]  gap between modules (horizontal)
- | det_vgp  | 0                 | [pix]  gap between modules (vertical)
- | det_hmn  | 1                 | [int]  number of modules (horizontal)
- | det_vmn  | 1                 | [int]  number of modules (vertical)
+ | det.name | 'Name Version'    | [auto] generated
+ | det.hms  | 10.0              | [cm]   module size (horizontal)
+ | det.vms  | 14.0              | [cm]   module size (vertical)
+ | det.pxs  | 50e-4             | [cm]   pixel size
+ | det.hgp  | 0                 | [pix]  gap between modules (horizontal)
+ | det.vgp  | 0                 | [pix]  gap between modules (vertical)
+ | det.hmn  | 1                 | [int]  number of modules (horizontal)
+ | det.vmn  | 1                 | [int]  number of modules (vertical)
  
