@@ -1,5 +1,5 @@
 import numpy as np
-from matplotlib.widgets import TextBox, RadioButtons
+from matplotlib.widgets import TextBox, RadioButtons, Slider
 from matplotlib import pyplot as plt
 plt.rcParams['savefig.dpi'] = 300
 from matplotlib import cm, colors, patches
@@ -11,13 +11,12 @@ def get_specs():
     geo = container()
     geo.det_type = 'Eiger2 CdTe' # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'          # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
-    geo.dist = 8.0               # [cm]   Detector distance
+    geo.dist = 80.0              # [mm]   Detector distance
     geo.tilt = 0.0               # [deg]  Detector tilt
-    geo.rota = 20.0              # [deg]  Detector rotation
-    geo.yoff = 0.0               # [cm]   Detector offset (vertical)
-    geo.energy = 21.0            # [keV]  Beam energy
+    geo.rota = 0.0               # [deg]  Detector rotation
+    geo.yoff = 0.0               # [mm]   Detector offset (vertical)
+    geo.ener = 21.0              # [keV]  Beam energy
     geo.unit = 'd'               # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
-    geo.origin = True            # [bool] Plot contour lines for original geometry?
 
     ###########################
     # Detector Specifications #
@@ -27,9 +26,9 @@ def get_specs():
         ###############################
         # Specifications for Pilatus3 #
         ###############################
-        det.hms = 8.38    # [cm]  Module size (horizontal)
-        det.vms = 3.35    # [cm]  Module size (vertical)
-        det.pxs = 172e-4  # [cm]  Pixel size
+        det.hms = 83.8    # [mm]  Module size (horizontal)
+        det.vms = 33.5    # [mm]  Module size (vertical)
+        det.pxs = 172e-3  # [mm]  Pixel size
         det.hgp = 7       # [pix] Gap between modules (horizontal)
         det.vgp = 17      # [pix] Gap between modules (vertical)
         det.name = f'{geo.det_type} {geo.det_size}'
@@ -42,9 +41,9 @@ def get_specs():
         #############################
         # Specifications for Eiger2 #
         #############################
-        det.hms = 7.71    # [cm]  Module size (horizontal)
-        det.vms = 3.84    # [cm]  Module size (vertical)
-        det.pxs = 75e-4   # [cm]  Pixel size
+        det.hms = 77.1    # [mm]  Module size (horizontal)
+        det.vms = 38.4    # [mm]  Module size (vertical)
+        det.pxs = 75e-3   # [mm]  Pixel size
         det.hgp = 38      # [pix] Gap between modules (horizontal)
         det.vgp = 12      # [pix] Gap between modules (vertical)
         det.name = f'{geo.det_type} {geo.det_size}'
@@ -57,9 +56,9 @@ def get_specs():
         ###########################################
         # ADD CUSTOM DETECTOR SPECIFICATIONS HERE #
         ###########################################
-        det.hms = 10.0    # [cm]  Module size (horizontal)
-        det.vms = 14.0    # [cm]  Module size (vertical)
-        det.pxs = 10e-4   # [cm]  Pixel size
+        det.hms = 100.0   # [mm]  Module size (horizontal)
+        det.vms = 140.0   # [mm]  Module size (vertical)
+        det.pxs = 10e-3   # [mm]  Pixel size
         det.hgp = 0       # [pix] Gap between modules (horizontal)
         det.vgp = 0       # [pix] Gap between modules (vertical)
         det.hmn = 1       # [int] Number of modules (horizontal)
@@ -71,11 +70,12 @@ def get_specs():
     ################
     plo = container()
     plo.cont_levels = np.logspace(1,-1,num=15)/2  # [list]   Contour levels (high -> low)
-    plo.cont_fsize = 8                            # [int]    Contour label size
+    plo.cont_fsize = 9                            # [int]    Contour label size
     plo.cont_geom_cmark = 'o'                     # [marker] Beam center marker (geometry)
     plo.cont_geom_csize = 4                       # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00                    # [float]  Contour alpha (geometry)
     plo.cont_geom_cmap = cm.get_cmap('viridis')   # [cmap]   Contour colormap (geometry)
+    plo.origin = True                             # [bool] Plot contour lines for original geometry?
     plo.cont_orig_cmark = 'o'                     # [marker] Beam center marker (original)
     plo.cont_orig_csize = 4                       # [int]    Beam center size (original)
     plo.cont_orig_alpha = 0.25                    # [float]  Contour alpha (original)
@@ -83,19 +83,38 @@ def get_specs():
     plo.cont_reso = 100                           # [int]    Minimum contour steps
     plo.module_alpha = 0.20                       # [float]  Detector module alpha
     plo.module_color = 'gray'                     # [color]  Detector module color
-    plo.margin_top = 0.93                         # [float]  Plot margin for title
+    plo.margin_top = 0.85                         # [float]  Plot margin for title
     plo.plot_size = 8                             # [int]    Plot size
     plo.interactive = True                        # [bool]   Make the plot interactive
-    plo.debug_3d = False                          # [bool]   DEBUG plot 3D cones?
+
+    ##########
+    # Limits #
+    ##########
+    lmt = container()
+    lmt.ener_min = 1.0   # [float] Energy minimum [keV]
+    lmt.ener_max = 100.0 # [float] Energy maximum [keV]
+    lmt.ener_stp = 0.1   # [float] Energy step size [keV]
+    lmt.dist_min = 40.0  # [float] Distance minimum [mm]
+    lmt.dist_max = 450.0 # [float] Distance maximum [mm]
+    lmt.dist_stp = 1.0   # [float] Distance step size [mm]
+    lmt.yoff_min = -0.0  # [float] Offset minimum [mm]
+    lmt.yoff_max = 200.0 # [float] Offset maximum [mm]
+    lmt.yoff_stp = 1.0   # [float] Offset step size [mm]
+    lmt.rota_min = 0.0   # [float] Rotation minimum [deg]
+    lmt.rota_max = 45.0  # [float] Rotation maximum [deg]
+    lmt.rota_stp = 1.0   # [float] Rotation step size [deg]
+    lmt.tilt_min = 0.0   # [float] Tilt minimum [deg]
+    lmt.tilt_max = 45.0  # [float] Tilt maximum [deg]
+    lmt.tilt_stp = 1.0   # [float] Tilt step size [deg]
 
     ###################################
     # !!! Don't change below here !!! #
     ###################################
-    return geo, det, plo
+    return geo, det, plo, lmt
 
 def main():
     # fetch the geometry, detector and plot specifications
-    geo, det, plo = get_specs()
+    geo, det, plo, lmt = get_specs()
     # translate unit for plot title
     geo.unit_names = {'t':r'2$\theta$',
                       'd':r'$d_{space}$',
@@ -104,6 +123,8 @@ def main():
     if geo.unit not in geo.unit_names.keys():
         print('Unknown contour label unit!')
         raise SystemExit
+    # the reversed (v:k) dict is needed for the radio buttons
+    geo.unit_names_r = dict(map(reversed, geo.unit_names.items()))
     # figure out proper plot dimensions
     plo.xdim = (det.hms * det.hmn + det.pxs * det.hgp * det.hmn)/2
     plo.ydim = (det.vms * det.vmn + det.pxs * det.vgp * det.vmn)/2
@@ -133,53 +154,29 @@ def main():
     # create cones and draw contour lines
     draw_contours(ax, geo, plo)
     # add title / information
-    plt.suptitle(f'{det.name} | Energy: {geo.energy} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {geo.unit_names[geo.unit]}', size=10)
+    plt.suptitle(f'{det.name} | Energy: {geo.ener} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {geo.unit_names[geo.unit]}', size=10)
     # adjust the margins
     plt.subplots_adjust(top=plo.margin_top, bottom=0, right=1, left=0, hspace=0, wspace=0)
     # generate some sense of interactivity
     if plo.interactive:
         # cut the title to make room for the text boxes
         plt.suptitle(f'{det.name}', size=10)
-        # add an axis for the radio buttons
-        axs_unit = fig.add_axes([0.0, 0.92, 0.09, 0.09], frameon=False)
-        # put the buttons in the axis
-        box_unit = RadioButtons(axs_unit, ('t','d','q','s'), active=1, activecolor=u'#1f77b4')
-        # update the plot on click
-        box_unit.on_clicked(lambda val: update_plot('unit', val, fig, geo, plo, det, ax))
-        # make a new axis for the TextBox
-        axs_ener = fig.add_axes([0.20, 0.93, 0.06, 0.03], frameon=False)
-        # add the box with label and initial value
-        box_ener = TextBox(axs_ener, 'Energy:', initial=geo.energy)
-        # update the plot on submit (press enter or leaving the box)
-        box_ener.on_submit(lambda val: update_plot('energy', val, fig, geo, plo, det, ax))
-        # make the TextBox respond to changing text
-        box_ener.on_text_change(lambda val: update_box(box_tilt, val))
-        # and distance
-        axs_dist = fig.add_axes([0.40, 0.93, 0.06, 0.03], frameon=False)
-        box_dist = TextBox(axs_dist, 'Distance:', initial=geo.dist)
-        box_dist.on_submit(lambda val: update_plot('dist', val, fig, geo, plo, det, ax))
-        box_dist.on_text_change(lambda val: update_box(box_dist, val))
-        # proceed with rotation
-        axs_rota = fig.add_axes([0.60, 0.93, 0.06, 0.03], frameon=False)
-        box_rota = TextBox(axs_rota, 'Rotation:', initial=geo.rota)
-        box_rota.on_submit(lambda val: update_plot('rota', val, fig, geo, plo, det, ax))
-        box_rota.on_text_change(lambda val: update_box(box_rota, val))
-        # and offset
-        axs_yoff = fig.add_axes([0.75, 0.93, 0.06, 0.03], frameon=False)
-        box_yoff = TextBox(axs_yoff, 'Offset:', initial=geo.yoff)
-        box_yoff.on_submit(lambda val: update_plot('yoff', val, fig, geo, plo, det, ax))
-        box_yoff.on_text_change(lambda val: update_box(box_yoff, val))
-        # and tilt
-        axs_tilt = fig.add_axes([0.90, 0.93, 0.06, 0.03], frameon=False)
-        box_tilt = TextBox(axs_tilt, 'Tilt:', initial=geo.tilt)
-        box_tilt.on_submit(lambda val: update_plot('tilt', val, fig, geo, plo, det, ax))
-        box_tilt.on_text_change(lambda val: update_box(box_tilt, val))
-
+        # add radio buttons and an axis for the buttons
+        axs_unit = fig.add_axes([0.0, 0.85, 0.15, 0.15], frameon=False, aspect='equal')
+        box_unit = RadioButtons(axs_unit, (geo.unit_names.values()), active=1, activecolor=u'#1f77b4')
+        box_unit.on_clicked(lambda val: update_plot('unit', geo.unit_names_r[val], fig, geo, plo, det, ax))
+        # change label size
+        for l in box_unit.labels:
+            l.set_size(plo.cont_fsize)
+        # Define sliders
+        #add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, det, plo)
+        sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, 0.85, 0.6, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, det, plo)
+        sli_rota = add_slider('Rotation [˚] ' , 'rota', 0.3, 0.87, 0.6, 0.025, geo.rota, lmt.rota_min, lmt.rota_max, lmt.rota_stp, fig, ax, geo, det, plo)
+        sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, 0.89, 0.6, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, det, plo)
+        sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, 0.91, 0.6, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, det, plo)
+        sli_ener = add_slider('Energy [keV] ' , 'ener', 0.3, 0.93, 0.6, 0.025, geo.ener, lmt.ener_min, lmt.ener_max, lmt.ener_stp, fig, ax, geo, det, plo)
     # show the plot
     plt.show()
-    # plot the 3d cones?
-    if plo.debug_3d:
-        plot_3d(geo, plo)
 
 def build_detector(bg, det, plo):
     # build detector modules
@@ -217,14 +214,14 @@ def draw_contours(ax, geo, plo):
         _thr = np.arctan(1/_scale)/2
         # Conversion factor keV to Angstrom: 12.398
         # sin(t)/l: np.sin(Theta) / lambda -> (12.398/geo_energy)
-        _stl = np.sin(_thr)/(12.398/geo.energy)
+        _stl = np.sin(_thr)/(12.398/geo.ener)
         # d-spacing: l = 2 d sin(t) -> 1/2(sin(t)/l)
         _dsp = 1/(2*_stl)
         # figure out the labels
         _units = {'n':None, 't':np.rad2deg(2*_thr),
                   'd':_dsp, 'q':_stl*4*np.pi, 's':_stl}
         # draw contours for the original geometry
-        if geo.origin:
+        if plo.origin:
             X0, Y0 = np.meshgrid(_x0,_x0)
             Z0 = np.sqrt(X0**2+Y0**2)*_scale
             X,Y,Z = geo_cone(X0, Y0, Z0, 0, 0, 0, geo.dist)
@@ -265,6 +262,15 @@ def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
     comp = np.deg2rad(tilt) * dist
     return Y,X+comp-yoff,Z
 
+def add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, det, plo):
+    axs = fig.add_axes([left, bottom, width, height])
+    sli = Slider(axs, label, valmin=vmin, valmax=vmax, valinit=val, handle_style={'size':plo.cont_fsize}, valstep=step)
+    sli.vline.set_alpha(0) # Remove the mark on the slider
+    sli.on_changed(lambda val: update_plot(name, val, fig, geo, plo, det, ax))
+    sli.label.set_size(plo.cont_fsize)
+    sli.valtext.set_size(plo.cont_fsize)
+    return sli
+
 def update_plot(nam, val, fig, geo, plo, det, ax):
     ##################################################
     # This is a sloppy and hacky way to achieve some #
@@ -280,8 +286,8 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
         geo.yoff = float(val)
     elif nam == 'unit':
         geo.unit = str(val)
-    elif nam == 'energy':
-        geo.energy = float(val)
+    elif nam == 'ener':
+        geo.ener = float(val)
     ax.clear()
     ax.set_aspect('equal')
     ax.set_axis_off()
@@ -291,29 +297,6 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
     draw_contours(ax, geo, plo)
     plt.suptitle(f'{det.name}', size=10)
     fig.canvas.blit(ax)
-
-def update_box(box, val):
-    box.canvas.blit()
-
-def plot_3d(geo, plo):
-    #####################################################
-    # - debug - debug - debug - debug - debug - debug - #
-    # - to check geometry, offset, tilt and rotation  - #
-    #####################################################
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    for n,i in enumerate(plo.cont_levels[-3:]):
-        ax.plot_wireframe(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, 0, 0, 0, geo.dist), alpha=0.1, colors='gray')
-        ax.contour(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, 0, 0, 0, geo.dist), [geo.dist], alpha=0.1, colors='gray')
-        ax.plot_wireframe(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, geo.rota, geo.tilt, geo.yoff, geo.dist), alpha=0.25, colors='red')
-        ax.contour(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, geo.rota, geo.tilt, geo.yoff, geo.dist), [geo.dist], colors='red')
-    ax.set_xlim(-plo.cont_grid_max/2, plo.cont_grid_max/2)
-    ax.set_ylim(-plo.cont_grid_max/2, plo.cont_grid_max/2)
-    ax.set_zlim(0, geo.dist)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    plt.show()
 
 class container(object):
     pass
