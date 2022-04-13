@@ -12,9 +12,9 @@ def get_specs():
     geo.det_type = 'Eiger2 CdTe' # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'          # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.dist = 8.0               # [cm]   Detector distance
-    geo.tilt = 20.0              # [deg]  Detector tilt
-    geo.rota = 0.0               # [deg]  Detector rotation
-    geo.yoff = 8.0               # [cm]   Detector offset (vertical)
+    geo.tilt = 0.0               # [deg]  Detector tilt
+    geo.rota = 20.0              # [deg]  Detector rotation
+    geo.yoff = 0.0               # [cm]   Detector offset (vertical)
     geo.energy = 21.0            # [keV]  Beam energy
     geo.unit = 'd'               # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
     geo.origin = True            # [bool] Plot contour lines for original geometry?
