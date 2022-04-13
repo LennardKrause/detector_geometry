@@ -75,7 +75,7 @@ def get_specs():
     plo.cont_geom_csize = 4                       # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00                    # [float]  Contour alpha (geometry)
     plo.cont_geom_cmap = cm.get_cmap('viridis')   # [cmap]   Contour colormap (geometry)
-    plo.origin = True                             # [bool] Plot contour lines for original geometry?
+    plo.origin = True                             # [bool]   Plot contour lines for original geometry?
     plo.cont_orig_cmark = 'o'                     # [marker] Beam center marker (original)
     plo.cont_orig_csize = 4                       # [int]    Beam center size (original)
     plo.cont_orig_alpha = 0.25                    # [float]  Contour alpha (original)
@@ -291,14 +291,17 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
         geo.unit = str(val)
     elif nam == 'ener':
         geo.ener = float(val)
+    # we need to clear the axis
+    # deleting the contours and labels
+    # individually didn't work!
     ax.clear()
+    # re-adjust the axis
     ax.set_aspect('equal')
     ax.set_axis_off()
     ax.set_xlim(-plo.xdim, plo.xdim)
     ax.set_ylim(-plo.ydim, plo.ydim)
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
-    plt.suptitle(f'{det.name}', size=10)
     fig.canvas.blit(ax)
 
 class container(object):
