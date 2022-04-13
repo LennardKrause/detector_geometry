@@ -83,7 +83,7 @@ def get_specs():
     plo.cont_reso = 100                           # [int]    Minimum contour steps
     plo.module_alpha = 0.20                       # [float]  Detector module alpha
     plo.module_color = 'gray'                     # [color]  Detector module color
-    plo.margin_top = 0.85                         # [float]  Plot margin for title
+    plo.margin_top = 0.93                         # [float]  Plot margin for title
     plo.plot_size = 8                             # [int]    Plot size
     plo.interactive = True                        # [bool]   Make the plot interactive
 
@@ -131,6 +131,9 @@ def main():
     plo.fig_ratio = plo.xdim / plo.ydim
     # scale contour grid to detector size
     plo.cont_grid_max = int(np.ceil(max(plo.xdim, plo.ydim)))
+    # make room for the interactive sliders
+    if plo.interactive:
+        plo.margin_top -= 0.08
     # init the plot
     fig = plt.figure(figsize=(plo.plot_size * plo.margin_top * plo.fig_ratio, plo.plot_size))
     # needed to avoid the following warning:
