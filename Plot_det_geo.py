@@ -9,14 +9,14 @@ def get_specs():
     # Setup the geometry #
     ######################
     geo = container()
-    geo.det_type = 'Eiger2 CdTe' # [str]  Pilatus3 / Eiger2
-    geo.det_size = '4M'          # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
-    geo.dist = 80.0              # [mm]   Detector distance
-    geo.tilt = 0.0               # [deg]  Detector tilt
-    geo.rota = 0.0               # [deg]  Detector rotation
-    geo.yoff = 0.0               # [mm]   Detector offset (vertical)
-    geo.ener = 21.0              # [keV]  Beam energy
-    geo.unit = 'd'               # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+    geo.det_type = 'Eiger2 CdTe'   # [str]  Pilatus3 / Eiger2
+    geo.det_size = '4M'            # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+    geo.ener = 21.0                # [keV]  Beam energy
+    geo.dist = 75.0                # [mm]   Detector distance
+    geo.yoff = 0.0                 # [mm]   Detector offset (vertical)
+    geo.rota = 32.0                # [deg]  Detector rotation
+    geo.tilt = 0.0                 # [deg]  Detector tilt
+    geo.unit = 'd'                 # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
 
     ###########################
     # Detector Specifications #
@@ -97,7 +97,7 @@ def get_specs():
     lmt.dist_min = 40.0  # [float] Distance minimum [mm]
     lmt.dist_max = 450.0 # [float] Distance maximum [mm]
     lmt.dist_stp = 1.0   # [float] Distance step size [mm]
-    lmt.yoff_min = 0.0   # [float] Offset minimum [mm]
+    lmt.yoff_min = -0.0  # [float] Offset minimum [mm]
     lmt.yoff_max = 200.0 # [float] Offset maximum [mm]
     lmt.yoff_stp = 1.0   # [float] Offset step size [mm]
     lmt.rota_min = 0.0   # [float] Rotation minimum [deg]
@@ -197,6 +197,8 @@ def build_detector(bg, det, plo):
 def draw_contours(ax, geo, plo):
     # calculate the y offset resulting from the tilt and rotation
     _geo_offset = -(geo.yoff + np.deg2rad(geo.rota)*geo.dist)
+    # draw the cones slightly larger than the visible detector
+    _geo_margin = 1.25
     # draw beam center
     ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
     ax.plot(0, _geo_offset, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
@@ -207,11 +209,11 @@ def draw_contours(ax, geo, plo):
         # as smaller cones/contours (large i) need higher sampling
         # but make sure the sampling rate doesn't fall below the
         # user set plo.cont_reso value
-        _x0 = np.linspace(-plo.cont_grid_max, plo.cont_grid_max, max(int(plo.cont_reso*_scale), plo.cont_reso))
+        _x0 = np.linspace(-_geo_margin*plo.cont_grid_max, _geo_margin*plo.cont_grid_max, max(int(plo.cont_reso*_scale), plo.cont_reso))
         # the grid position needs to adjusted upon change of geometry
         # the center needs to be shifted by _geo_offset to make sure 
         # sll contour lines are drawn
-        _x1 = np.linspace(-plo.cont_grid_max-_geo_offset, plo.cont_grid_max-_geo_offset, max(int(plo.cont_reso*_scale), plo.cont_reso))
+        _x1 = np.linspace(-_geo_margin*plo.cont_grid_max-_geo_offset, _geo_margin*plo.cont_grid_max-_geo_offset, max(int(plo.cont_reso*_scale), plo.cont_reso))
         # calculate resolution rings
         # 2-Theta: np.arctan(dist/(dist/i))
         _thr = np.arctan(1/_scale)/2
@@ -244,11 +246,13 @@ def draw_contours(ax, geo, plo):
         if np.max(Z) > geo.dist:
             # make sure the rotated geometry contour can
             # be drawn, is within the adjusted grid
-            if plo.cont_grid_max - np.min(Z) > 0:
+            if plo.cont_grid_max -_geo_offset - np.min(Z) > 0:
                 c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
                 # label moved geometry contours
                 fmt = {c1.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
                 ax.clabel(c1, c1.levels, inline=True, fontsize=plo.cont_fsize, fmt=fmt, manual=[(0,plo.ydim)])
+            else:
+                print(plo.cont_grid_max, np.min(Z))
         else:
             # if the Z*i is too small, break as the following cycles
             # will make Z only smaller -> leaving no contours to draw
