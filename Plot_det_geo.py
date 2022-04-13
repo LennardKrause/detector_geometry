@@ -97,7 +97,7 @@ def get_specs():
     lmt.dist_min = 40.0  # [float] Distance minimum [mm]
     lmt.dist_max = 450.0 # [float] Distance maximum [mm]
     lmt.dist_stp = 1.0   # [float] Distance step size [mm]
-    lmt.yoff_min = -0.0  # [float] Offset minimum [mm]
+    lmt.yoff_min = 0.0   # [float] Offset minimum [mm]
     lmt.yoff_max = 200.0 # [float] Offset maximum [mm]
     lmt.yoff_stp = 1.0   # [float] Offset step size [mm]
     lmt.rota_min = 0.0   # [float] Rotation minimum [deg]
