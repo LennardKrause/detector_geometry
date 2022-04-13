@@ -6,69 +6,29 @@
  - It uses [python3](https://www.python.org), [numpy](https://numpy.org) and [matplotlib 3.5.1](https://matplotlib.org).
 
 ## Short how-to:
- - Edit the geometry section in the *.py* file
+ - Edit the .py file:
+   - Choose a detector (Eiger2 or Pilatus3)
+   - Choose a model (300K, 1M, 2M, etc.)
  - run it
-#### Or
- - run it (plo.interactive = True)
- - Use the (highly unsatisfying) text input to change geometry:
-   - Detector [cm]
-   - Tilt [˚]
-   - Offset [cm]
-   - Rotation [˚]
- - And the (slightly better) radio buttons (top left) to change the unit:
-   - d: d-space
-   - t: 2-theta
-   - q: q-space
-   - s: sin(theta)/lambda
+ - Use the sliders to change energy and geometry
+ - Use the radio buttons to change contour units
 
-## Here's an example showing a Pilatus3 2M offset vertically:
+## Here's an example showing a rotated Eiger2 4M:
+![Image](../main/_lib/Eiger2_CdTe_4M_interactive.png)
 
- |   Geometry   |        Value      | Hint |
- |--------------|-------------------|------|
- | geo.det_type | 'Pilatus3 X CdTe' | [str]  Pilatus3 / Eiger2
- | geo.det_size | '2M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
- | geo.dist     | 17.5              | [cm]   Detector distance
- | geo.tilt     | 0.0               | [deg]  Detector tilt
- | geo.rota     | 0.0               | [deg]  Detector rotation
- | geo.yoff     | 13.0              | [cm]   Detector offset (vertical)
- | geo.energy   | 35.0              | [keV]  Beam energy
- | geo.unit     | 'q'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | geo.origin   | True              | [bool] Plot contour lines for original geometry?
-
-![Image](../main/Pilatus3_X_CdTe_2M.png)
-
-## And a rotated Eiger2 4M:
-
- |   Geometry   |        Value      | Hint |
- |--------------|-------------------|------|
- | geo.det_type | 'Eiger2 CdTe'     | [str]  Pilatus3 / Eiger2
- | geo.det_size | '4M'              | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
- | geo.dist     | 7.5               | [cm]   Detector distance
- | geo.tilt     | 0.0               | [deg]  Detector tilt
- | geo.rota     | 20.0              | [deg]  Detector rotation
- | geo.yoff     | 0.0               | [cm]   Detector offset (vertical)
- | geo.energy   | 22.0              | [keV]  Beam energy
- | geo.unit     | 'd'               | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | geo.origin   | True              | [bool] Plot contour lines for original geometry?
- 
-![Image](../main/Eiger2_CdTe_4M.png)
+##### Limits and Plot details can be changed in the .py file
 
 ## To add a detector:
- - Choose 'Name' and 'Version' (will be used in the figure title).
- - 'Name' must not start with 'Pilatus' or 'Eiger', those are pre-set.
- - Adjust the "ADD CUSTOM DETECTOR SPECIFICATIONS HERE" section.
+ - Choose 'Name' and 'Version' (will be used in the figure title)
+ - 'Name' must not start with 'Pilatus' or 'Eiger', those are pre-set
 
  |   Geometry   |   Value   | Hint |
  |--------------|-----------|------|
  | geo.det_type | 'Name'    | [str]  Pilatus3 / Eiger2
  | geo.det_size | 'Version' | [str]  300K 1M 2M 6M / 1M 4M 9M 16M
- | geo.dist     | 6.0       | [cm]   Detector distance
- | geo.tilt     | 0.0       | [deg]  Detector tilt
- | geo.rota     | 0.0       | [deg]  Detector rotation
- | geo.yoff     | 0.0       | [cm]   Detector offset (vertical)
- | geo.energy   | 17.0      | [keV]  Beam energy
- | geo.unit     | 'd'       | [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
- | geo.origin   | True      | [bool] Plot contour lines for original geometry?
+
+ - Adjust the "ADD CUSTOM DETECTOR SPECIFICATIONS HERE" section
+ - The pixel size is only used to calculate the gap size
 
  | Detector |       Value       | Hint |
  |----------|-------------------|------|
@@ -81,3 +41,4 @@
  | det.hmn  | 1                 | [int]  Number of modules (horizontal)
  | det.vmn  | 1                 | [int]  Number of modules (vertical)
  
+##### I hope this turns out to be useful for someone!
