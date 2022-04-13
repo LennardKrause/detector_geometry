@@ -163,7 +163,7 @@ def main():
     # generate some sense of interactivity
     if plo.interactive:
         # cut the title to make room for the text boxes
-        plt.suptitle(f'{det.name}', size=10)
+        plt.suptitle(f'{det.name}', size=10, fontweight='bold')
         # add radio buttons and an axis for the buttons
         axs_unit = fig.add_axes([0.0, 0.85, 0.15, 0.15], frameon=False, aspect='equal')
         box_unit = RadioButtons(axs_unit, (geo.unit_names.values()), active=1, activecolor=u'#1f77b4')
