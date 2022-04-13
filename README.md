@@ -33,9 +33,9 @@
  | Detector |       Value       | Hint |
  |----------|-------------------|------|
  | det.name | 'Name Version'    | [auto] Generated
- | det.hms  | 10.0              | [cm]   Module size (horizontal)
- | det.vms  | 14.0              | [cm]   Module size (vertical)
- | det.pxs  | 50e-4             | [cm]   Pixel size
+ | det.hms  | 100.0             | [mm]   Module size (horizontal)
+ | det.vms  | 140.0             | [mm]   Module size (vertical)
+ | det.pxs  | 50e-3             | [mm]   Pixel size
  | det.hgp  | 0                 | [pix]  Gap between modules (horizontal)
  | det.vgp  | 0                 | [pix]  Gap between modules (vertical)
  | det.hmn  | 1                 | [int]  Number of modules (horizontal)
