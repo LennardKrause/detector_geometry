@@ -201,7 +201,6 @@ def draw_contours(ax, geo, plo):
     ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
     ax.plot(0, _geo_offset, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
     # draw contour lines
-    print()
     for n,_scale in enumerate(plo.cont_levels):
         # prepare the grid for the cones/contours
         # adjust the resolution using i (-> plo.cont_levels),
