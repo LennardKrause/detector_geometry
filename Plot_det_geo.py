@@ -12,9 +12,9 @@ def get_specs():
     geo.det_type = 'Eiger2 CdTe' # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'          # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.dist = 8.0               # [cm]   Detector distance
-    geo.tilt = 0.0               # [deg]  Detector tilt
+    geo.tilt = 20.0              # [deg]  Detector tilt
     geo.rota = 0.0               # [deg]  Detector rotation
-    geo.yoff = 0.0               # [cm]   Detector offset (vertical)
+    geo.yoff = 8.0               # [cm]   Detector offset (vertical)
     geo.energy = 21.0            # [keV]  Beam energy
     geo.unit = 'd'               # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
     geo.origin = True            # [bool] Plot contour lines for original geometry?
@@ -70,20 +70,23 @@ def get_specs():
     # Plot Details #
     ################
     plo = container()
-    plo.cont_levels = np.logspace(-1,1,num=15)/2  # [list]  Contour levels
-    plo.cont_fsize = 8                            # [int]   Contour label size
-    plo.cont_geom_alpha = 1.00                    # [float] Contour alpha (geometry)
-    plo.cont_geom_cmap = cm.get_cmap('viridis_r') # [cmap]  Contour colormap (geometry)
-    plo.cont_orig_alpha = 0.25                    # [float] Contour alpha (original)
-    plo.cont_orig_color = 'gray'                  # [color] Contour color (original)
-    plo.cont_reso = 500                           # [int]   Contour steps (accuracy)
-    plo.cont_xmax = 50                            # [int]   Max x/y for drawing contours
-    plo.module_alpha = 0.20                       # [float] Detector module alpha
-    plo.module_color = 'gray'                     # [color] Detector module color
-    plo.margin_top = 0.93                         # [float] Plot margin for title
-    plo.plot_size = 7                             # [int]   Plot size
-    plo.interactive = True                        # [bool]  Make the plot interactive
-    plo.debug_3d = False                          # [bool]  DEBUG plot 3D cones?
+    plo.cont_levels = np.logspace(1,-1,num=15)/2  # [list]   Contour levels (high -> low)
+    plo.cont_fsize = 8                            # [int]    Contour label size
+    plo.cont_geom_cmark = 'o'                     # [marker] Beam center marker (geometry)
+    plo.cont_geom_csize = 4                       # [int]    Beam center size (geometry)
+    plo.cont_geom_alpha = 1.00                    # [float]  Contour alpha (geometry)
+    plo.cont_geom_cmap = cm.get_cmap('viridis')   # [cmap]   Contour colormap (geometry)
+    plo.cont_orig_cmark = 'o'                     # [marker] Beam center marker (original)
+    plo.cont_orig_csize = 4                       # [int]    Beam center size (original)
+    plo.cont_orig_alpha = 0.25                    # [float]  Contour alpha (original)
+    plo.cont_orig_color = 'gray'                  # [color]  Contour color (original)
+    plo.cont_reso = 100                           # [int]    Minimum contour steps
+    plo.module_alpha = 0.20                       # [float]  Detector module alpha
+    plo.module_color = 'gray'                     # [color]  Detector module color
+    plo.margin_top = 0.93                         # [float]  Plot margin for title
+    plo.plot_size = 8                             # [int]    Plot size
+    plo.interactive = True                        # [bool]   Make the plot interactive
+    plo.debug_3d = False                          # [bool]   DEBUG plot 3D cones?
 
     ###################################
     # !!! Don't change below here !!! #
@@ -102,9 +105,11 @@ def main():
         print('Unknown contour label unit!')
         raise SystemExit
     # figure out proper plot dimensions
-    plo.xdim = (det.hms * det.hmn + det.pxs * det.hgp * det.hmn)
-    plo.ydim = (det.vms * det.vmn + det.pxs * det.vgp * det.vmn)
+    plo.xdim = (det.hms * det.hmn + det.pxs * det.hgp * det.hmn)/2
+    plo.ydim = (det.vms * det.vmn + det.pxs * det.vgp * det.vmn)/2
     plo.fig_ratio = plo.xdim / plo.ydim
+    # scale contour grid to detector size
+    plo.cont_grid_max = int(np.ceil(max(plo.xdim, plo.ydim)))
     # init the plot
     fig = plt.figure(figsize=(plo.plot_size * plo.margin_top * plo.fig_ratio, plo.plot_size))
     # needed to avoid the following warning:
@@ -119,10 +124,10 @@ def main():
     bg.set_axis_off()
     ax.set_axis_off()
     # limit the axes
-    bg.set_xlim(-plo.xdim/2, plo.xdim/2)
-    ax.set_xlim(-plo.xdim/2, plo.xdim/2)
-    bg.set_ylim(-plo.ydim/2, plo.ydim/2)
-    ax.set_ylim(-plo.ydim/2, plo.ydim/2)
+    bg.set_xlim(-plo.xdim, plo.xdim)
+    ax.set_xlim(-plo.xdim, plo.xdim)
+    bg.set_ylim(-plo.ydim, plo.ydim)
+    ax.set_ylim(-plo.ydim, plo.ydim)
     # setup detector and geometry
     build_detector(bg, det, plo)
     # create cones and draw contour lines
@@ -190,51 +195,75 @@ def build_detector(bg, det, plo):
             bg.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
 
 def draw_contours(ax, geo, plo):
+    # calculate the y offset resulting from the tilt and rotation
+    _geo_offset = -(geo.yoff + np.deg2rad(geo.rota)*geo.dist)
+    # draw beam center
+    ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
+    ax.plot(0, _geo_offset, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
     # draw contour lines
-    for n,i in enumerate(plo.cont_levels):
+    print()
+    for n,_scale in enumerate(plo.cont_levels):
+        # prepare the grid for the cones/contours
+        # adjust the resolution using i (-> plo.cont_levels),
+        # as smaller cones/contours (large i) need higher sampling
+        # but make sure the sampling rate doesn't fall below the
+        # user set plo.cont_reso value
+        _x0 = np.linspace(-plo.cont_grid_max, plo.cont_grid_max, max(int(plo.cont_reso*_scale), plo.cont_reso))
+        # the grid position needs to adjusted upon change of geometry
+        # the center needs to be shifted by _geo_offset to make sure 
+        # sll contour lines are drawn
+        _x1 = np.linspace(-plo.cont_grid_max-_geo_offset, plo.cont_grid_max-_geo_offset, max(int(plo.cont_reso*_scale), plo.cont_reso))
         # calculate resolution rings
         # 2-Theta: np.arctan(dist/(dist/i))
-        thr = np.arctan(1/i)/2
+        _thr = np.arctan(1/_scale)/2
         # Conversion factor keV to Angstrom: 12.398
         # sin(t)/l: np.sin(Theta) / lambda -> (12.398/geo_energy)
-        stl = np.sin(thr)/(12.398/geo.energy)
+        _stl = np.sin(_thr)/(12.398/geo.energy)
         # d-spacing: l = 2 d sin(t) -> 1/2(sin(t)/l)
-        dsp = 1/(2*stl)
+        _dsp = 1/(2*_stl)
         # figure out the labels
-        unit_dict = {'n':None, 't':np.rad2deg(2*thr),
-                     'd':dsp, 'q':stl*4*np.pi, 's':stl}
+        _units = {'n':None, 't':np.rad2deg(2*_thr),
+                  'd':_dsp, 'q':_stl*4*np.pi, 's':_stl}
         # draw contours for the original geometry
         if geo.origin:
-            X,Y,Z = create_cone(i, 0, 0, 0, geo.dist, plo.cont_xmax, plo.cont_reso)
+            X0, Y0 = np.meshgrid(_x0,_x0)
+            Z0 = np.sqrt(X0**2+Y0**2)*_scale
+            X,Y,Z = geo_cone(X0, Y0, Z0, 0, 0, 0, geo.dist)
             # don't draw contour lines that are out of bounds
             # make sure Z is large enough to draw the contour
             if np.max(Z) >= geo.dist:
                 c0 = ax.contour(X, Y, Z, [geo.dist], colors=plo.cont_orig_color, alpha=plo.cont_orig_alpha)
                 # label original geometry contours
-                fmt = {c0.levels[0]:f'{np.round(unit_dict[geo.unit],2):.2f}'}
+                fmt = {c0.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
                 ax.clabel(c0, c0.levels, inline=True, fontsize=plo.cont_fsize, fmt=fmt, manual=[(plo.xdim,plo.ydim)])
         # draw contours for the tilted/rotated/moved geometry
-        X,Y,Z = create_cone(i, geo.rota, geo.tilt, geo.yoff, geo.dist, plo.cont_xmax, plo.cont_reso)
+        # use the offset adjusted value x1 to prepare the grid
+        X0, Y0 = np.meshgrid(_x1,_x0)
+        Z0 = np.sqrt(X0**2+Y0**2)*_scale
+        X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.yoff, geo.dist)
         # make sure Z is large enough to draw the contour
-        if np.max(Z) >= geo.dist:
-            c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
-            # label moved geometry contours
-            fmt = {c1.levels[0]:f'{np.round(unit_dict[geo.unit],2):.2f}'}
-            ax.clabel(c1, c1.levels, inline=True, fontsize=plo.cont_fsize, fmt=fmt, manual=[(0,plo.ydim)])
+        if np.max(Z) > geo.dist:
+            # make sure the rotated geometry contour can
+            # be drawn, is within the adjusted grid
+            if plo.cont_grid_max - np.min(Z) > 0:
+                c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
+                # label moved geometry contours
+                fmt = {c1.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
+                ax.clabel(c1, c1.levels, inline=True, fontsize=plo.cont_fsize, fmt=fmt, manual=[(0,plo.ydim)])
+        else:
+            # if the Z*i is too small, break as the following cycles
+            # will make Z only smaller -> leaving no contours to draw
+            # - only True if the contours are iterated high to low!
+            break
 
-def create_cone(dim, rota, tilt, yoff, geo_dist, plt_cont_xmax, plt_cont_reso):
-    # creating grid
-    x = np.linspace(-plt_cont_xmax,plt_cont_xmax,plt_cont_reso)
-    X,Y = np.meshgrid(x,x)
-    # set z values
-    Z = np.sqrt(X**2+Y**2)*dim
+def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
     # rotate the sample around y
     a = np.deg2rad(tilt) + np.deg2rad(rota)
     t = np.transpose(np.array([X,Y,Z]), (1,2,0))
     m = [[np.cos(a), 0, np.sin(a)],[0,1,0],[-np.sin(a), 0, np.cos(a)]]
     X,Y,Z = np.transpose(np.dot(t, m), (2,0,1))
     # compensate for tilt
-    comp = np.deg2rad(tilt) * geo_dist
+    comp = np.deg2rad(tilt) * dist
     return Y,X+comp-yoff,Z
 
 def update_plot(nam, val, fig, geo, plo, det, ax):
@@ -254,12 +283,11 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
         geo.unit = str(val)
     elif nam == 'energy':
         geo.energy = float(val)
-    # remove contour lines
-    for _ in ax.collections:
-        ax.collections.pop()
-    # remove contour labels
-    for _ in ax.texts:
-        ax.texts.pop()
+    ax.clear()
+    ax.set_aspect('equal')
+    ax.set_axis_off()
+    ax.set_xlim(-plo.xdim, plo.xdim)
+    ax.set_ylim(-plo.ydim, plo.ydim)
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
     plt.suptitle(f'{det.name}', size=10)
@@ -276,12 +304,12 @@ def plot_3d(geo, plo):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     for n,i in enumerate(plo.cont_levels[-3:]):
-        ax.plot_wireframe(*create_cone(i, 0, 0, 0, geo.dist, plo.cont_xmax, plo.cont_reso), alpha=0.1, colors='gray')
-        ax.contour(*create_cone(i, 0, 0, 0, geo.dist, plo.cont_xmax, plo.cont_reso), [geo.dist], alpha=0.1, colors='gray')
-        ax.plot_wireframe(*create_cone(i, geo.rota, geo.tilt, geo.yoff, geo.dist, plo.cont_xmax, plo.cont_reso), alpha=0.25, colors='red')
-        ax.contour(*create_cone(i, geo.rota, geo.tilt, geo.yoff, geo.dist, plo.cont_xmax, plo.cont_reso), [geo.dist], colors='red')
-    ax.set_xlim(-plo.cont_xmax/2, plo.cont_xmax/2)
-    ax.set_ylim(-plo.cont_xmax/2, plo.cont_xmax/2)
+        ax.plot_wireframe(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, 0, 0, 0, geo.dist), alpha=0.1, colors='gray')
+        ax.contour(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, 0, 0, 0, geo.dist), [geo.dist], alpha=0.1, colors='gray')
+        ax.plot_wireframe(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, geo.rota, geo.tilt, geo.yoff, geo.dist), alpha=0.25, colors='red')
+        ax.contour(*geo_cone(geo.X0, geo.Y0, geo.Z0*i, geo.rota, geo.tilt, geo.yoff, geo.dist), [geo.dist], colors='red')
+    ax.set_xlim(-plo.cont_grid_max/2, plo.cont_grid_max/2)
+    ax.set_ylim(-plo.cont_grid_max/2, plo.cont_grid_max/2)
     ax.set_zlim(0, geo.dist)
     ax.set_xlabel('x')
     ax.set_ylabel('y')
