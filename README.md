@@ -1,5 +1,5 @@
 # detector_geometry
-#### A tool to project X-ray diffraction cones on a detector screen at different geometries (tilt, rotation, offset) and X-ray energies
+#### A tool to project X-ray diffraction cones onto a detector screen at different geometries (tilt, rotation, offset) and X-ray energies
  - Main application is to visualize the maximum achievable resolution at a given geometry
  - The math used is not meant to bring people to the moon but to provide a quick and simple preview
  - The module building code is designed for [Dectris](https://www.dectris.com) [Pilatus3](https://www.dectris.com/detectors/x-ray-detectors/pilatus3/) and [Eiger2](https://www.dectris.com/detectors/x-ray-detectors/eiger2/) Detectors but one-module systems like the [Bruker](https://www.bruker.com/en.html) [Photon II](https://www.bruker.com/en/products-and-solutions/diffractometers-and-scattering-systems/single-crystal-x-ray-diffractometers/sc-xrd-components/detectors.html) are possible as well
