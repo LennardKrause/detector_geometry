@@ -3,7 +3,6 @@ from matplotlib.widgets import TextBox, RadioButtons, Slider
 from matplotlib import pyplot as plt
 plt.rcParams['savefig.dpi'] = 300
 from matplotlib import cm, colors, patches
-from time import perf_counter
 
 def get_specs():
     ######################
@@ -295,7 +294,6 @@ def add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, 
     return sli
 
 def update_plot(nam, val, fig, geo, plo, ax):
-    _t = perf_counter()
     ##################################################
     # This is a sloppy and hacky way to achieve some #
     #   interactivity without building a proper GUI  #
@@ -335,8 +333,6 @@ def update_plot(nam, val, fig, geo, plo, ax):
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
     fig.canvas.blit(ax)
-    _d = perf_counter()-_t
-    print(f'{_d:.4f} {1/_d:.4f}')
 
 class container(object):
     pass
