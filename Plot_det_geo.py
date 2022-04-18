@@ -3,6 +3,7 @@ from matplotlib.widgets import TextBox, RadioButtons, Slider
 from matplotlib import pyplot as plt
 plt.rcParams['savefig.dpi'] = 300
 from matplotlib import cm, colors, patches
+from time import perf_counter
 
 def get_specs():
     ######################
@@ -16,7 +17,7 @@ def get_specs():
     geo.yoff = 0.0                 # [mm]   Detector offset (vertical)
     geo.rota = 32.0                # [deg]  Detector rotation
     geo.tilt = 0.0                 # [deg]  Detector tilt
-    geo.unit = 'd'                 # [tdqs] Contour legend (t: 2-Theta, d: d-spacing, q: q-space, s: sin(theta)/lambda)
+    geo.unit = 1                   # [0-3]  Contour legend (0: 2-Theta, 1: d-spacing, 2: q-space, 3: sin(theta)/lambda)
 
     ###########################
     # Detector Specifications #
@@ -70,7 +71,6 @@ def get_specs():
     ################
     plo = container()
     plo.cont_levels = np.logspace(1,-1,num=15)/2  # [list]   Contour levels (high -> low)
-    plo.cont_fsize = 9                            # [int]    Contour label size
     plo.cont_geom_cmark = 'o'                     # [marker] Beam center marker (geometry)
     plo.cont_geom_csize = 4                       # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00                    # [float]  Contour alpha (geometry)
@@ -80,12 +80,20 @@ def get_specs():
     plo.cont_orig_csize = 4                       # [int]    Beam center size (original)
     plo.cont_orig_alpha = 0.25                    # [float]  Contour alpha (original)
     plo.cont_orig_color = 'gray'                  # [color]  Contour color (original)
-    plo.cont_reso = 100                           # [int]    Minimum contour steps
+    plo.cont_reso_min = 50                        # [int]    Minimum contour steps
+    plo.cont_reso_max = 500                       # [int]    Maximum contour steps
     plo.module_alpha = 0.20                       # [float]  Detector module alpha
     plo.module_color = 'gray'                     # [color]  Detector module color
-    plo.margin_top = 0.93                         # [float]  Plot margin for title
+    plo.margin_top = 0.95                         # [float]  Plot margin for title
     plo.plot_size = 8                             # [int]    Plot size
+    plo.label_size = 9                            # [int]    Label size
     plo.interactive = True                        # [bool]   Make the plot interactive
+    plo.action_ener = True                        # [bool]   Show energy slider
+    plo.action_dist = True                        # [bool]   Show distance slider
+    plo.action_rota = True                        # [bool]   Show rotation slider
+    plo.action_yoff = True                        # [bool]   Show offset slider
+    plo.action_tilt = True                        # [bool]   Show tilt slider
+    plo.action_radio = True                       # [bool]   Show radio buttons
 
     ##########
     # Limits #
@@ -116,26 +124,18 @@ def main():
     # fetch the geometry, detector and plot specifications
     geo, det, plo, lmt = get_specs()
     # translate unit for plot title
-    geo.unit_names = {'t':r'2$\theta$',
-                      'd':r'$d_{space}$',
-                      'q':r'$q_{space}$',
-                      's':r'$sin(\theta)/\lambda$'}
-    if geo.unit not in geo.unit_names.keys():
-        print('Unknown contour label unit!')
+    geo.unit_names = [r'2$\theta$', r'$d_{space}$', r'$q_{space}$', r'$sin(\theta)/\lambda$']
+    if geo.unit >= len(geo.unit_names):
+        print(f'Error: Valid geo.unit range is from 0 to {len(geo.unit_names)-1}, geo.unit={geo.unit}')
         raise SystemExit
-    # the reversed (v:k) dict is needed for the radio buttons
-    geo.unit_names_r = dict(map(reversed, geo.unit_names.items()))
     # figure out proper plot dimensions
     plo.xdim = (det.hms * det.hmn + det.pxs * det.hgp * det.hmn)/2
     plo.ydim = (det.vms * det.vmn + det.pxs * det.vgp * det.vmn)/2
     plo.fig_ratio = plo.xdim / plo.ydim
     # scale contour grid to detector size
     plo.cont_grid_max = int(np.ceil(max(plo.xdim, plo.ydim)))
-    # make room for the interactive sliders
-    if plo.interactive:
-        plo.margin_top -= 0.08
     # init the plot
-    fig = plt.figure(figsize=(plo.plot_size * plo.margin_top * plo.fig_ratio, plo.plot_size))
+    fig = plt.figure()
     # needed to avoid the following warning:
     # MatplotlibDeprecationWarning: Toggling axes navigation from the keyboard is deprecated
     # since 3.3 and will be removed two minor releases later.
@@ -156,28 +156,46 @@ def main():
     build_detector(bg, det, plo)
     # create cones and draw contour lines
     draw_contours(ax, geo, plo)
-    # add title / information
-    plt.suptitle(f'{det.name} | Energy: {geo.ener} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {geo.unit_names[geo.unit]}', size=10)
-    # adjust the margins
-    plt.subplots_adjust(top=plo.margin_top, bottom=0, right=1, left=0, hspace=0, wspace=0)
     # generate some sense of interactivity
     if plo.interactive:
-        # cut the title to make room for the text boxes
+        # add short title to make room for the text boxes
         plt.suptitle(f'{det.name}', size=10, fontweight='bold')
-        # add radio buttons and an axis for the buttons
-        axs_unit = fig.add_axes([0.0, 0.85, 0.15, 0.15], frameon=False, aspect='equal')
-        box_unit = RadioButtons(axs_unit, (geo.unit_names.values()), active=1, activecolor=u'#1f77b4')
-        box_unit.on_clicked(lambda val: update_plot('unit', geo.unit_names_r[val], fig, geo, plo, det, ax))
-        # change label size
-        for l in box_unit.labels:
-            l.set_size(plo.cont_fsize)
         # Define sliders
         #add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, det, plo)
-        sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, 0.85, 0.6, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, det, plo)
-        sli_rota = add_slider('Rotation [˚] ' , 'rota', 0.3, 0.87, 0.6, 0.025, geo.rota, lmt.rota_min, lmt.rota_max, lmt.rota_stp, fig, ax, geo, det, plo)
-        sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, 0.89, 0.6, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, det, plo)
-        sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, 0.91, 0.6, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, det, plo)
-        sli_ener = add_slider('Energy [keV] ' , 'ener', 0.3, 0.93, 0.6, 0.025, geo.ener, lmt.ener_min, lmt.ener_max, lmt.ener_stp, fig, ax, geo, det, plo)
+        # make room for the interactive sliders
+        if plo.action_ener:
+            plo.margin_top -= 0.02
+            sli_ener = add_slider('Energy [keV] ' , 'ener', 0.3, plo.margin_top, 0.6, 0.025, geo.ener, lmt.ener_min, lmt.ener_max, lmt.ener_stp, fig, ax, geo, det, plo)
+        if plo.action_dist:
+            plo.margin_top -= 0.02
+            sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, plo.margin_top, 0.6, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, det, plo)
+        if plo.action_yoff:
+            plo.margin_top -= 0.02
+            sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, plo.margin_top, 0.6, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, det, plo)
+        if plo.action_tilt:
+            plo.margin_top -= 0.02
+            sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, plo.margin_top, 0.6, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, det, plo)
+        if plo.action_rota:
+            plo.margin_top -= 0.02
+            sli_rota = add_slider('Rotation [˚] ' , 'rota', 0.3, plo.margin_top, 0.6, 0.025, geo.rota, lmt.rota_min, lmt.rota_max, lmt.rota_stp, fig, ax, geo, det, plo)
+        # add radio buttons and an axis for the buttons
+        if plo.action_radio:
+            _ds = 1.0 - (plo.margin_top-0.01)
+            axs_unit = fig.add_axes([0.0, plo.margin_top-0.01, _ds, _ds], frameon=False, aspect='equal')
+            box_unit = RadioButtons(axs_unit, geo.unit_names, active=geo.unit, activecolor=u'#1f77b4')
+            box_unit.on_clicked(lambda val: update_plot('unit', geo.unit_names.index(val), fig, geo, plo, ax))
+            # change label size
+            for l in box_unit.labels:
+                l.set_size(plo.label_size)
+    else:
+        # make room for the second title line
+        plo.margin_top -= 0.02
+        # add title / information
+        plt.suptitle(f'{det.name} | Energy: {geo.ener} keV | Distance: {geo.dist} cm\nRotation: {geo.rota}° | Tilt: {geo.tilt}° | Offset: {geo.yoff} cm | Units: {geo.unit_names[geo.unit]}', size=10)
+    # adjust the margins
+    plt.subplots_adjust(top=plo.margin_top, bottom=0, right=1, left=0, hspace=0, wspace=0)
+    # adjust the figure size
+    fig.set_size_inches(plo.plot_size * plo.margin_top * plo.fig_ratio, plo.plot_size)
     # show the plot
     plt.show()
 
@@ -195,25 +213,29 @@ def build_detector(bg, det, plo):
             bg.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
 
 def draw_contours(ax, geo, plo):
-    # calculate the y offset resulting from the tilt and rotation
-    _geo_offset = -(geo.yoff + np.deg2rad(geo.rota)*geo.dist)
-    # draw the cones slightly larger than the visible detector
-    _geo_margin = 1.25
+    # calculate the offset of the contours resulting from yoff and rotation
+    # shift the grid to draw the cones, to make sure the contours are drawn
+    # within the visible area
+    _comp_shift = -(geo.yoff + np.deg2rad(geo.rota)*geo.dist)
+    # increase the the cone grid to allow more
+    # contours to be drawn as the plane is tilted
+    _comp_add = np.deg2rad(geo.tilt)*geo.dist
     # draw beam center
     ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
-    ax.plot(0, _geo_offset, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
+    ax.plot(0, _comp_shift, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
     # draw contour lines
     for n,_scale in enumerate(plo.cont_levels):
         # prepare the grid for the cones/contours
         # adjust the resolution using i (-> plo.cont_levels),
         # as smaller cones/contours (large i) need higher sampling
         # but make sure the sampling rate doesn't fall below the
-        # user set plo.cont_reso value
-        _x0 = np.linspace(-_geo_margin*plo.cont_grid_max, _geo_margin*plo.cont_grid_max, max(int(plo.cont_reso*_scale), plo.cont_reso))
+        # user set plo.cont_reso_min value and plo.cont_reso_max
+        # prevents large numbers that will take seconds to draw
+        _x0 = np.linspace(-plo.cont_grid_max, plo.cont_grid_max, max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min))
         # the grid position needs to adjusted upon change of geometry
         # the center needs to be shifted by _geo_offset to make sure 
         # sll contour lines are drawn
-        _x1 = np.linspace(-_geo_margin*plo.cont_grid_max-_geo_offset, _geo_margin*plo.cont_grid_max-_geo_offset, max(int(plo.cont_reso*_scale), plo.cont_reso))
+        _x1 = np.linspace(-plo.cont_grid_max-_comp_shift, plo.cont_grid_max-_comp_shift+_comp_add, max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min))
         # calculate resolution rings
         # 2-Theta: np.arctan(dist/(dist/i))
         _thr = np.arctan(1/_scale)/2
@@ -223,8 +245,7 @@ def draw_contours(ax, geo, plo):
         # d-spacing: l = 2 d sin(t) -> 1/2(sin(t)/l)
         _dsp = 1/(2*_stl)
         # figure out the labels
-        _units = {'n':None, 't':np.rad2deg(2*_thr),
-                  'd':_dsp, 'q':_stl*4*np.pi, 's':_stl}
+        _units = {0:np.rad2deg(2*_thr), 1:_dsp, 2:_stl*4*np.pi, 3:_stl}
         # draw contours for the original geometry
         if plo.origin:
             X0, Y0 = np.meshgrid(_x0,_x0)
@@ -236,7 +257,7 @@ def draw_contours(ax, geo, plo):
                 c0 = ax.contour(X, Y, Z, [geo.dist], colors=plo.cont_orig_color, alpha=plo.cont_orig_alpha)
                 # label original geometry contours
                 fmt = {c0.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
-                ax.clabel(c0, c0.levels, inline=True, fontsize=plo.cont_fsize, fmt=fmt, manual=[(plo.xdim,plo.ydim)])
+                ax.clabel(c0, c0.levels, inline=True, fontsize=plo.label_size, fmt=fmt, manual=[(plo.xdim,plo.ydim)])
         # draw contours for the tilted/rotated/moved geometry
         # use the offset adjusted value x1 to prepare the grid
         X0, Y0 = np.meshgrid(_x1,_x0)
@@ -244,15 +265,10 @@ def draw_contours(ax, geo, plo):
         X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.yoff, geo.dist)
         # make sure Z is large enough to draw the contour
         if np.max(Z) > geo.dist:
-            # make sure the rotated geometry contour can
-            # be drawn, is within the adjusted grid
-            if plo.cont_grid_max -_geo_offset - np.min(Z) > 0:
-                c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
-                # label moved geometry contours
-                fmt = {c1.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
-                ax.clabel(c1, c1.levels, inline=True, fontsize=plo.cont_fsize, fmt=fmt, manual=[(0,plo.ydim)])
-            else:
-                print(plo.cont_grid_max, np.min(Z))
+            c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
+            # label moved geometry contours
+            fmt = {c1.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
+            ax.clabel(c1, c1.levels, inline=True, fontsize=plo.label_size, fmt=fmt, manual=[(0,plo.ydim)])
         else:
             # if the Z*i is too small, break as the following cycles
             # will make Z only smaller -> leaving no contours to draw
@@ -271,14 +287,15 @@ def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
 
 def add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, det, plo):
     axs = fig.add_axes([left, bottom, width, height])
-    sli = Slider(axs, label, valmin=vmin, valmax=vmax, valinit=val, handle_style={'size':plo.cont_fsize}, valstep=step)
+    sli = Slider(axs, label, valmin=vmin, valmax=vmax, valinit=val, handle_style={'size':plo.label_size}, valstep=step)
     sli.vline.set_alpha(0) # Remove the mark on the slider
-    sli.on_changed(lambda val: update_plot(name, val, fig, geo, plo, det, ax))
-    sli.label.set_size(plo.cont_fsize)
-    sli.valtext.set_size(plo.cont_fsize)
+    sli.on_changed(lambda val: update_plot(name, val, fig, geo, plo, ax))
+    sli.label.set_size(plo.label_size)
+    sli.valtext.set_size(plo.label_size)
     return sli
 
-def update_plot(nam, val, fig, geo, plo, det, ax):
+def update_plot(nam, val, fig, geo, plo, ax):
+    _t = perf_counter()
     ##################################################
     # This is a sloppy and hacky way to achieve some #
     #   interactivity without building a proper GUI  #
@@ -292,14 +309,25 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
     elif nam == 'yoff':
         geo.yoff = float(val)
     elif nam == 'unit':
-        geo.unit = str(val)
+        geo.unit = int(val)
     elif nam == 'ener':
         geo.ener = float(val)
     # we need to clear the axis
     # deleting the contours and labels
-    # individually didn't work!
+    # individually didn't work as not 
+    # all artists are removed.
+    # the beam center is a line
+    #for a in ax.lines:
+    #    a.remove()
+    # the contour label is a text
+    #for t in ax.texts:
+    #    t.remove()
+    # the contour is a collection
+    #for c in ax.collections:
+    #    c.remove()
+    # clear the axis
     ax.clear()
-    # re-adjust the axis
+    # re-adjust the layout
     ax.set_aspect('equal')
     ax.set_axis_off()
     ax.set_xlim(-plo.xdim, plo.xdim)
@@ -307,6 +335,8 @@ def update_plot(nam, val, fig, geo, plo, det, ax):
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
     fig.canvas.blit(ax)
+    _d = perf_counter()-_t
+    print(f'{_d:.4f} {1/_d:.4f}')
 
 class container(object):
     pass
