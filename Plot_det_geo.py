@@ -332,7 +332,7 @@ def update_plot(nam, val, fig, geo, plo, ax):
     ax.set_ylim(-plo.ydim, plo.ydim)
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
-    fig.canvas.blit(ax)
+    fig.canvas.blit(ax.bbox)
 
 class container(object):
     pass
