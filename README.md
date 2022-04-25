@@ -13,6 +13,10 @@
  - Use the sliders to change energy and geometry
  - Use the radio buttons to change contour units
 
+## Latest update:
+  - 2022.04.25 Bugfix: calculation of the beamcenter (rotation and tilt)
+  - 2022.04.25 Bugfix: unresponsive radio buttons / redrawing the figure
+
 ## Here's an example showing a rotated Eiger2 4M:
 ![Image](../main/_lib/Eiger2_CdTe_4M_interactive.png)
 
