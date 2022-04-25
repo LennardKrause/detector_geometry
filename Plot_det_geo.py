@@ -215,10 +215,10 @@ def draw_contours(ax, geo, plo):
     # calculate the offset of the contours resulting from yoff and rotation
     # shift the grid to draw the cones, to make sure the contours are drawn
     # within the visible area
-    _comp_shift = -(geo.yoff + np.deg2rad(geo.rota)*geo.dist)
+    _comp_shift = -(geo.yoff + np.tan(np.deg2rad(geo.rota))*geo.dist)
     # increase the the cone grid to allow more
     # contours to be drawn as the plane is tilted
-    _comp_add = np.deg2rad(geo.tilt)*geo.dist
+    _comp_add = np.tan(np.deg2rad(geo.tilt))*geo.dist
     # draw beam center
     ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
     ax.plot(0, _comp_shift, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
