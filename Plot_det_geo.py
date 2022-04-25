@@ -329,7 +329,10 @@ def update_plot(nam, val, fig, geo, plo, ax):
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
     # blit the ax
-    fig.canvas.blit(ax.bbox)
+    if plt.rcParams['backend'] == 'MacOSX':
+        fig.canvas.blit(ax.bbox)
+    else:
+        fig.canvas.draw()
 
 class container(object):
     pass
