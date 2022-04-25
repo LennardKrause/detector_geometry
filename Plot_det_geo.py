@@ -234,7 +234,7 @@ def draw_contours(ax, geo, plo):
         # the grid position needs to adjusted upon change of geometry
         # the center needs to be shifted by _geo_offset to make sure 
         # sll contour lines are drawn
-        _x1 = np.linspace(-plo.cont_grid_max-_comp_shift, plo.cont_grid_max-_comp_shift+_comp_add, max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min))
+        _x1 = np.linspace(-plo.cont_grid_max+_comp_shift, plo.cont_grid_max-_comp_shift+_comp_add, max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min))
         # calculate resolution rings
         # 2-Theta: np.arctan(dist/(dist/i))
         _thr = np.arctan(1/_scale)/2
