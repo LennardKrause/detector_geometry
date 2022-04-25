@@ -298,6 +298,10 @@ def update_plot(nam, val, fig, geo, plo, ax):
     # This is a sloppy and hacky way to achieve some #
     #   interactivity without building a proper GUI  #
     ##################################################
+    # this works with MacOS backend
+    # but seems to have problems with
+    # Tk and Qt Agg backends for which the
+    # radio buttons have to be pressed twice
     if nam == 'dist':
         geo.dist = float(val)
     elif nam == 'rota':
@@ -310,28 +314,21 @@ def update_plot(nam, val, fig, geo, plo, ax):
         geo.unit = int(val)
     elif nam == 'ener':
         geo.ener = float(val)
-    # we need to clear the axis
-    # deleting the contours and labels
-    # individually didn't work as not 
-    # all artists are removed.
-    # the beam center is a line
-    #for a in ax.lines:
-    #    a.remove()
-    # the contour label is a text
-    #for t in ax.texts:
-    #    t.remove()
-    # the contour is a collection
-    #for c in ax.collections:
-    #    c.remove()
     # clear the axis
-    ax.clear()
-    # re-adjust the layout
-    ax.set_aspect('equal')
-    ax.set_axis_off()
-    ax.set_xlim(-plo.xdim, plo.xdim)
-    ax.set_ylim(-plo.ydim, plo.ydim)
+    # the beam center is a line
+    for _a in ax.lines:
+        _a.remove()
+    # the contour label is a text
+    for _t in ax.texts:
+        _t.remove()
+    # the contour is a collection
+    # and needs some special attention
+    # to make sure all contours are removed
+    while len(ax.collections) > 0:
+        ax.collections.pop()
     # re-calculate cones and re-draw contours
     draw_contours(ax, geo, plo)
+    # blit the ax
     fig.canvas.blit(ax.bbox)
 
 class container(object):
