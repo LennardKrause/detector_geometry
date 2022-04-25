@@ -1,5 +1,5 @@
 import numpy as np
-from matplotlib.widgets import TextBox, RadioButtons, Slider
+from matplotlib.widgets import RadioButtons, Slider
 from matplotlib import pyplot as plt
 plt.rcParams['savefig.dpi'] = 300
 from matplotlib import cm, colors, patches
