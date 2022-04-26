@@ -31,6 +31,7 @@ def get_specs():
         det.pxs = 172e-3  # [mm]  Pixel size
         det.hgp = 7       # [pix] Gap between modules (horizontal)
         det.vgp = 17      # [pix] Gap between modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
         det.name = f'{geo.det_type} {geo.det_size}'
         det.sizes = {'300K':(1,3),'1M':(2,5),'2M':(3,8),'6M':(5,12)}
         if geo.det_size not in det.sizes.keys():
@@ -46,8 +47,25 @@ def get_specs():
         det.pxs = 75e-3   # [mm]  Pixel size
         det.hgp = 38      # [pix] Gap between modules (horizontal)
         det.vgp = 12      # [pix] Gap between modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
         det.name = f'{geo.det_type} {geo.det_size}'
         det.sizes = {'1M':(1,2),'4M':(2,4),'9M':(3,6),'16M':(4,8)}
+        if geo.det_size not in det.sizes.keys():
+            print('Unknown detector type/size combination!')
+            raise SystemExit
+        det.hmn, det.vmn = det.sizes[geo.det_size]
+    elif geo.det_type.startswith('MPCCD'):
+        #############################
+        # Specifications for MPCCD #
+        #############################
+        det.hms = 51.2    # [mm]  Module size (horizontal)
+        det.vms = 25.6    # [mm]  Module size (vertical)
+        det.pxs = 50e-3   # [mm]  Pixel size
+        det.hgp = 18      # [pix] Gap between modules (horizontal)
+        det.vgp = 27      # [pix] Gap between modules (vertical)
+        det.cbh = 3       # [mm]  Central beam hole
+        det.name = f'{geo.det_type} {geo.det_size}'
+        det.sizes = {'4M':(2,4)}
         if geo.det_size not in det.sizes.keys():
             print('Unknown detector type/size combination!')
             raise SystemExit
@@ -63,6 +81,7 @@ def get_specs():
         det.vgp = 0       # [pix] Gap between modules (vertical)
         det.hmn = 1       # [int] Number of modules (horizontal)
         det.vmn = 1       # [int] Number of modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
         det.name = f'{geo.det_type} {geo.det_size}'
 
     ################
@@ -128,8 +147,8 @@ def main():
         print(f'Error: Valid geo.unit range is from 0 to {len(geo.unit_names)-1}, geo.unit={geo.unit}')
         raise SystemExit
     # figure out proper plot dimensions
-    plo.xdim = (det.hms * det.hmn + det.pxs * det.hgp * det.hmn)/2
-    plo.ydim = (det.vms * det.vmn + det.pxs * det.vgp * det.vmn)/2
+    plo.xdim = (det.hms * det.hmn + det.pxs * det.hgp * det.hmn + det.cbh)/2
+    plo.ydim = (det.vms * det.vmn + det.pxs * det.vgp * det.vmn + det.cbh)/2
     plo.fig_ratio = plo.xdim / plo.ydim
     # scale contour grid to detector size
     plo.cont_grid_max = int(np.ceil(max(plo.xdim, plo.ydim)))
@@ -204,12 +223,19 @@ def build_detector(bg, det, plo):
     # determined by the "+det.hmn%2" part
     for i in range(-det.hmn//2+det.hmn%2, det.hmn-det.hmn//2):
         for j in range(-det.vmn//2+det.vmn%2, det.vmn-det.vmn//2):
-            # place modules along x (i) and y (j) keeping the gaps in mind ( + (det.hgp*det.pxs)/2)
-            # the " - ((det.hms+det.hgp*det.pxs)/2)" positions the origin (the beam) at the center of a module
-            # and "det.hmn%2" makes sure this is only active for detectors with an odd number of modules
-            origin_x = i*(det.hms+det.hgp*det.pxs) - ((det.hms+det.hgp*det.pxs)/2)*(det.hmn%2) + (det.hgp*det.pxs)/2
-            origin_y = j*(det.vms+det.vgp*det.pxs) - ((det.vms+det.vgp*det.pxs)/2)*(det.vmn%2) + (det.vgp*det.pxs)/2
+            # - place modules along x (i) and y (j) keeping the gaps in mind ( + (det.hgp*det.pxs)/2)
+            # - the " - ((det.hms+det.hgp*det.pxs)/2)" positions the origin (the beam) at the center of a module
+            #   and "det.hmn%2" makes sure this is only active for detectors with an odd number of modules
+            # - define sets of panels that collectively move to realize a central hole offset for MPCCD detectors
+            #   that are used at SACLA/SPring-8:
+            #   x = (...) + (det.cbh/2)*(2*(j&det.vmn)//det.vmn-1)
+            #   y = (...) + (det.cbh/2)*(1-2*(i&det.hmn)//det.hmn)
+            # - negative values of det.cbh for 'clockwise' offset order
+            origin_x = i*(det.hms+det.hgp*det.pxs) - ((det.hms+det.hgp*det.pxs)/2)*(det.hmn%2) + (det.hgp*det.pxs)/2 + (det.cbh/2)*(2*(j&det.vmn)//det.vmn-1)
+            origin_y = j*(det.vms+det.vgp*det.pxs) - ((det.vms+det.vgp*det.pxs)/2)*(det.vmn%2) + (det.vgp*det.pxs)/2 + (det.cbh/2)*(1-2*(i&det.hmn)//det.hmn)
             bg.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
+            # print indices on panel
+            #bg.annotate(f'{i} {j}', (origin_x+det.hms/2, origin_y+det.vms/2), color='gray', alpha=0.2, size=16, ha='center')
 
 def draw_contours(ax, geo, plo):
     # calculate the offset of the contours resulting from yoff and rotation
