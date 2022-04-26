@@ -14,8 +14,9 @@
  - Use the radio buttons to change contour units
 
 ## Latest update:
-  - 2022.04.25 Bugfix: calculation of the beamcenter (rotation and tilt)
-  - 2022.04.25 Bugfix: unresponsive radio buttons / redrawing the figure
+  - 2022-04-25 Update: Added support for SACLA MPCCD Detectors (central hole geometry)
+  - 2022-04-25 Bugfix: calculation of the beamcenter (rotation and tilt)
+  - 2022-04-25 Bugfix: unresponsive radio buttons / redrawing the figure
 
 ## Here's an example showing a rotated Eiger2 4M:
 ![Image](../main/_lib/Eiger2_CdTe_4M_interactive.png)
@@ -44,5 +45,6 @@
  | det.vgp  | 0                 | [pix]  Gap between modules (vertical)
  | det.hmn  | 1                 | [int]  Number of modules (horizontal)
  | det.vmn  | 1                 | [int]  Number of modules (vertical)
+ | det.cbh  | 0                 | [mm]   Central beam hole
  
 ##### I hope this turns out to be useful for someone!
