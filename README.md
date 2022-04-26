@@ -14,7 +14,7 @@
  - Use the radio buttons to change contour units
 
 ## Latest update:
-  - 2022-04-25 Update: Added support for SACLA MPCCD Detectors (central hole geometry)
+  - 2022-04-25 Update: Added support for [SACLA](https://sacla.xfel.jp/?lang=en) MPCCD Detectors (central hole geometry)
   - 2022-04-25 Bugfix: calculation of the beamcenter (rotation and tilt)
   - 2022-04-25 Bugfix: unresponsive radio buttons / redrawing the figure
 
