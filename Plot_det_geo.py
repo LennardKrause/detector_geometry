@@ -1,7 +1,6 @@
 import numpy as np
 from matplotlib.widgets import RadioButtons, Slider
 from matplotlib import pyplot as plt
-plt.rcParams['savefig.dpi'] = 300
 from matplotlib import cm, colors, patches
 
 def get_specs():
@@ -93,7 +92,7 @@ def get_specs():
     plo.cont_geom_csize = 4                       # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00                    # [float]  Contour alpha (geometry)
     plo.cont_geom_cmap = cm.get_cmap('viridis')   # [cmap]   Contour colormap (geometry)
-    plo.origin = True                             # [bool]   Plot contour lines for original geometry?
+    plo.cont_norm_inc = True                      # [bool]   Plot contours for normal incidence geometry
     plo.cont_orig_cmark = 'o'                     # [marker] Beam center marker (original)
     plo.cont_orig_csize = 4                       # [int]    Beam center size (original)
     plo.cont_orig_alpha = 0.25                    # [float]  Contour alpha (original)
@@ -105,6 +104,7 @@ def get_specs():
     plo.margin_top = 0.95                         # [float]  Plot margin for title
     plo.plot_size = 8                             # [int]    Plot size
     plo.label_size = 9                            # [int]    Label size
+    plo.plot_dpi = 300                            # [int]    Set plot DPI for saving
     plo.interactive = True                        # [bool]   Make the plot interactive
     plo.action_ener = True                        # [bool]   Show energy slider
     plo.action_dist = True                        # [bool]   Show distance slider
@@ -123,7 +123,7 @@ def get_specs():
     lmt.dist_min = 40.0  # [float] Distance minimum [mm]
     lmt.dist_max = 450.0 # [float] Distance maximum [mm]
     lmt.dist_stp = 1.0   # [float] Distance step size [mm]
-    lmt.yoff_min = -0.0  # [float] Offset minimum [mm]
+    lmt.yoff_min = 0.0   # [float] Offset minimum [mm]
     lmt.yoff_max = 200.0 # [float] Offset maximum [mm]
     lmt.yoff_stp = 1.0   # [float] Offset step size [mm]
     lmt.rota_min = 0.0   # [float] Rotation minimum [deg]
@@ -139,13 +139,15 @@ def get_specs():
     return geo, det, plo, lmt
 
 def main():
-    # fetch the geometry, detector and plot specifications
+    # fetch the geometry, detector, plot specifications and limits
     geo, det, plo, lmt = get_specs()
     # translate unit for plot title
     geo.unit_names = [r'2$\theta$', r'$d_{space}$', r'$q_{space}$', r'$sin(\theta)/\lambda$']
     if geo.unit >= len(geo.unit_names):
         print(f'Error: Valid geo.unit range is from 0 to {len(geo.unit_names)-1}, geo.unit={geo.unit}')
         raise SystemExit
+    # set rcParams
+    plt.rcParams['savefig.dpi'] = plo.plot_dpi
     # figure out proper plot dimensions
     plo.xdim = (det.hms * det.hmn + det.pxs * det.hgp * det.hmn + det.cbh)/2
     plo.ydim = (det.vms * det.vmn + det.pxs * det.vgp * det.vmn + det.cbh)/2
@@ -154,18 +156,14 @@ def main():
     plo.cont_grid_max = int(np.ceil(max(plo.xdim, plo.ydim)))
     # init the plot
     fig = plt.figure()
-    # needed to avoid the following warning:
-    # MatplotlibDeprecationWarning: Toggling axes navigation from the keyboard is deprecated
-    # since 3.3 and will be removed two minor releases later.
-    #fig.canvas.mpl_disconnect(fig.canvas.manager.key_press_handler_id)
-    # add axis for the detector modules
+    # add axes for the detector modules
     bg = fig.add_subplot(111, aspect='equal')
-    # add axis for the contours
+    # add axes for the contours
     ax = fig.add_subplot(111, aspect='equal')
-    # remove the axis
+    # remove both axis, ticks and labels
     bg.set_axis_off()
     ax.set_axis_off()
-    # limit the axes
+    # limit the axis x and y
     bg.set_xlim(-plo.xdim, plo.xdim)
     ax.set_xlim(-plo.xdim, plo.xdim)
     bg.set_ylim(-plo.ydim, plo.ydim)
@@ -178,27 +176,29 @@ def main():
     if plo.interactive:
         # add short title to make room for the text boxes
         plt.suptitle(f'{det.name}', size=10, fontweight='bold')
-        # Define sliders
-        #add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, det, plo)
-        # make room for the interactive sliders
+        # define sliders
         if plo.action_ener:
+            # make room for the sliders
             plo.margin_top -= 0.02
-            sli_ener = add_slider('Energy [keV] ' , 'ener', 0.3, plo.margin_top, 0.6, 0.025, geo.ener, lmt.ener_min, lmt.ener_max, lmt.ener_stp, fig, ax, geo, det, plo)
+            # add slider
+            sli_ener = add_slider('Energy [keV] ' , 'ener', 0.3, plo.margin_top, 0.6, 0.025, geo.ener, lmt.ener_min, lmt.ener_max, lmt.ener_stp, fig, ax, geo, plo)
         if plo.action_dist:
             plo.margin_top -= 0.02
-            sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, plo.margin_top, 0.6, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, det, plo)
+            sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, plo.margin_top, 0.6, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, plo)
         if plo.action_yoff:
             plo.margin_top -= 0.02
-            sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, plo.margin_top, 0.6, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, det, plo)
+            sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, plo.margin_top, 0.6, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, plo)
         if plo.action_tilt:
             plo.margin_top -= 0.02
-            sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, plo.margin_top, 0.6, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, det, plo)
+            sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, plo.margin_top, 0.6, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, plo)
         if plo.action_rota:
             plo.margin_top -= 0.02
-            sli_rota = add_slider('Rotation [˚] ' , 'rota', 0.3, plo.margin_top, 0.6, 0.025, geo.rota, lmt.rota_min, lmt.rota_max, lmt.rota_stp, fig, ax, geo, det, plo)
+            sli_rota = add_slider('Rotation [˚] ' , 'rota', 0.3, plo.margin_top, 0.6, 0.025, geo.rota, lmt.rota_min, lmt.rota_max, lmt.rota_stp, fig, ax, geo, plo)
         # add radio buttons and an axis for the buttons
         if plo.action_radio:
+            # figure out a proper size of the axis
             _ds = 1.0 - (plo.margin_top-0.01)
+            # add the axes
             axs_unit = fig.add_axes([0.0, plo.margin_top-0.01, _ds, _ds], frameon=False, aspect='equal')
             box_unit = RadioButtons(axs_unit, geo.unit_names, active=geo.unit, activecolor=u'#1f77b4')
             box_unit.on_clicked(lambda val: update_plot('unit', geo.unit_names.index(val), fig, geo, plo, ax))
@@ -233,9 +233,10 @@ def build_detector(bg, det, plo):
             # - negative values of det.cbh for 'clockwise' offset order
             origin_x = i*(det.hms+det.hgp*det.pxs) - ((det.hms+det.hgp*det.pxs)/2)*(det.hmn%2) + (det.hgp*det.pxs)/2 + (det.cbh/2)*(2*(j&det.vmn)//det.vmn-1)
             origin_y = j*(det.vms+det.vgp*det.pxs) - ((det.vms+det.vgp*det.pxs)/2)*(det.vmn%2) + (det.vgp*det.pxs)/2 + (det.cbh/2)*(1-2*(i&det.hmn)//det.hmn)
-            bg.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
-            # print indices on panel
+            # DEBUG: print indices on panels
             #bg.annotate(f'{i} {j}', (origin_x+det.hms/2, origin_y+det.vms/2), color='gray', alpha=0.2, size=16, ha='center')
+            # add the module
+            bg.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
 
 def draw_contours(ax, geo, plo):
     # calculate the offset of the contours resulting from yoff and rotation
@@ -249,30 +250,32 @@ def draw_contours(ax, geo, plo):
     ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
     ax.plot(0, _comp_shift, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
     # draw contour lines
-    for n,_scale in enumerate(plo.cont_levels):
+    for _n,_scale in enumerate(plo.cont_levels):
+        # apply the min/max grid resolution
+        _grd_res = max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min)
         # prepare the grid for the cones/contours
         # adjust the resolution using i (-> plo.cont_levels),
         # as smaller cones/contours (large i) need higher sampling
         # but make sure the sampling rate doesn't fall below the
         # user set plo.cont_reso_min value and plo.cont_reso_max
         # prevents large numbers that will take seconds to draw
-        _x0 = np.linspace(-plo.cont_grid_max, plo.cont_grid_max, max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min))
+        _x0 = np.linspace(-plo.cont_grid_max, plo.cont_grid_max, _grd_res)
         # the grid position needs to adjusted upon change of geometry
         # the center needs to be shifted by _geo_offset to make sure 
         # sll contour lines are drawn
-        _x1 = np.linspace(-plo.cont_grid_max+_comp_shift, plo.cont_grid_max-_comp_shift+_comp_add, max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min))
+        _x1 = np.linspace(-plo.cont_grid_max + _comp_shift, plo.cont_grid_max - _comp_shift + _comp_add, _grd_res)
         # calculate resolution rings
-        # 2-Theta: np.arctan(dist/(dist/i))
+        # 2-Theta: np.arctan(dist/(dist/_scale))
         _thr = np.arctan(1/_scale)/2
         # Conversion factor keV to Angstrom: 12.398
         # sin(t)/l: np.sin(Theta) / lambda -> (12.398/geo_energy)
         _stl = np.sin(_thr)/(12.398/geo.ener)
         # d-spacing: l = 2 d sin(t) -> 1/2(sin(t)/l)
         _dsp = 1/(2*_stl)
-        # figure out the labels
+        # prepare the values in the different units / labels
         _units = {0:np.rad2deg(2*_thr), 1:_dsp, 2:_stl*4*np.pi, 3:_stl}
-        # draw contours for the original geometry
-        if plo.origin:
+        # draw additional contours for normal incidence geometry
+        if plo.cont_norm_inc:
             X0, Y0 = np.meshgrid(_x0,_x0)
             Z0 = np.sqrt(X0**2+Y0**2)*_scale
             X,Y,Z = geo_cone(X0, Y0, Z0, 0, 0, 0, geo.dist)
@@ -290,7 +293,7 @@ def draw_contours(ax, geo, plo):
         X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.yoff, geo.dist)
         # make sure Z is large enough to draw the contour
         if np.max(Z) > geo.dist:
-            c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
+            c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((_n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
             # label moved geometry contours
             fmt = {c1.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
             ax.clabel(c1, c1.levels, inline=True, fontsize=plo.label_size, fmt=fmt, manual=[(0,plo.ydim)])
@@ -301,16 +304,20 @@ def draw_contours(ax, geo, plo):
             break
 
 def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
-    # rotate the sample around y
+    # combined rotation, tilt 'movement' is compensated
     a = np.deg2rad(tilt) + np.deg2rad(rota)
+    # rotate the sample around y
     t = np.transpose(np.array([X,Y,Z]), (1,2,0))
+    # rotation matrix
     m = [[np.cos(a), 0, np.sin(a)],[0,1,0],[-np.sin(a), 0, np.cos(a)]]
+    # apply rotation
     X,Y,Z = np.transpose(np.dot(t, m), (2,0,1))
-    # compensate for tilt
+    # compensate for tilt not rotating
+    # - revert the travel distance
     comp = np.deg2rad(tilt) * dist
     return Y,X+comp-yoff,Z
 
-def add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, det, plo):
+def add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, plo):
     axs = fig.add_axes([left, bottom, width, height])
     sli = Slider(axs, label, valmin=vmin, valmax=vmax, valinit=val, handle_style={'size':plo.label_size}, valstep=step)
     sli.vline.set_alpha(0) # Remove the mark on the slider
