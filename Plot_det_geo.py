@@ -11,9 +11,9 @@ def get_specs():
     geo.det_type = 'Eiger2 CdTe'   # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'            # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.ener = 21.0                # [keV]  Beam energy
-    geo.dist = 75.0                # [mm]   Detector distance
+    geo.dist = 80.0                # [mm]   Detector distance
     geo.yoff = 0.0                 # [mm]   Detector offset (vertical)
-    geo.rota = 32.0                # [deg]  Detector rotation
+    geo.rota = 30.0                # [deg]  Detector rotation
     geo.tilt = 0.0                 # [deg]  Detector tilt
     geo.unit = 1                   # [0-3]  Contour legend (0: 2-Theta, 1: d-spacing, 2: q-space, 3: sin(theta)/lambda)
 
@@ -87,7 +87,9 @@ def get_specs():
     # Plot Details #
     ################
     plo = container()
-    plo.cont_levels = np.logspace(1,-1,num=15)/2  # [list]   Contour levels (high -> low)
+    plo.cont_tth_min = 5                          # [int]    minimum 2-theta contour line
+    plo.cont_tth_max = 90                         # [int]    maximum 2-theta contour line
+    plo.cont_tth_num = 15                         # [int]    number of contour lines
     plo.cont_geom_cmark = 'o'                     # [marker] Beam center marker (geometry)
     plo.cont_geom_csize = 4                       # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00                    # [float]  Contour alpha (geometry)
@@ -154,6 +156,8 @@ def main():
     plo.fig_ratio = plo.xdim / plo.ydim
     # scale contour grid to detector size
     plo.cont_grid_max = int(np.ceil(max(plo.xdim, plo.ydim)))
+    # generate contour levels
+    plo.cont_levels = np.linspace(plo.cont_tth_min, plo.cont_tth_max, plo.cont_tth_num)
     # init the plot
     fig = plt.figure()
     # add axes for the detector modules
@@ -250,9 +254,16 @@ def draw_contours(ax, geo, plo):
     ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
     ax.plot(0, _comp_shift, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
     # draw contour lines
-    for _n,_scale in enumerate(plo.cont_levels):
+    for _n,_ttd in enumerate(plo.cont_levels):
+        # convert theta in degrees to radians
+        _ttr = np.deg2rad(_ttd)
+        # calculate ratio of sample to detector distance (sdd)
+        # and contour distance to beam center (cbc)
+        # _rat = sdd/cbc = 1/tan(2-theta)
+        # this is used to scale the cones Z dimension
+        _rat = 1/np.tan(_ttr)
         # apply the min/max grid resolution
-        _grd_res = max(min(int(plo.cont_reso_min*_scale),plo.cont_reso_max), plo.cont_reso_min)
+        _grd_res = max(min(int(plo.cont_reso_min*_rat),plo.cont_reso_max), plo.cont_reso_min)
         # prepare the grid for the cones/contours
         # adjust the resolution using i (-> plo.cont_levels),
         # as smaller cones/contours (large i) need higher sampling
@@ -264,20 +275,17 @@ def draw_contours(ax, geo, plo):
         # the center needs to be shifted by _geo_offset to make sure 
         # sll contour lines are drawn
         _x1 = np.linspace(-plo.cont_grid_max + _comp_shift, plo.cont_grid_max - _comp_shift + _comp_add, _grd_res)
-        # calculate resolution rings
-        # 2-Theta: np.arctan(dist/(dist/_scale))
-        _thr = np.arctan(1/_scale)/2
         # Conversion factor keV to Angstrom: 12.398
         # sin(t)/l: np.sin(Theta) / lambda -> (12.398/geo_energy)
-        _stl = np.sin(_thr)/(12.398/geo.ener)
+        _stl = np.sin(_ttr/2)/(12.398/geo.ener)
         # d-spacing: l = 2 d sin(t) -> 1/2(sin(t)/l)
         _dsp = 1/(2*_stl)
         # prepare the values in the different units / labels
-        _units = {0:np.rad2deg(2*_thr), 1:_dsp, 2:_stl*4*np.pi, 3:_stl}
+        _units = {0:np.rad2deg(_ttr), 1:_dsp, 2:_stl*4*np.pi, 3:_stl}
         # draw additional contours for normal incidence geometry
         if plo.cont_norm_inc:
             X0, Y0 = np.meshgrid(_x0,_x0)
-            Z0 = np.sqrt(X0**2+Y0**2)*_scale
+            Z0 = np.sqrt(X0**2+Y0**2)*_rat
             X,Y,Z = geo_cone(X0, Y0, Z0, 0, 0, 0, geo.dist)
             # don't draw contour lines that are out of bounds
             # make sure Z is large enough to draw the contour
@@ -289,7 +297,7 @@ def draw_contours(ax, geo, plo):
         # draw contours for the tilted/rotated/moved geometry
         # use the offset adjusted value x1 to prepare the grid
         X0, Y0 = np.meshgrid(_x1,_x0)
-        Z0 = np.sqrt(X0**2+Y0**2)*_scale
+        Z0 = np.sqrt(X0**2+Y0**2)*_rat
         X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.yoff, geo.dist)
         # make sure Z is large enough to draw the contour
         if np.max(Z) > geo.dist:
