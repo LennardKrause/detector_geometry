@@ -88,12 +88,12 @@ def get_specs():
     ################
     plo = container()
     plo.cont_tth_min = 5                # [int]    minimum 2-theta contour line
-    plo.cont_tth_max = 150              # [int]    maximum 2-theta contour line
-    plo.cont_tth_num = 30               # [int]    number of contour lines
+    plo.cont_tth_max = 120              # [int]    maximum 2-theta contour line
+    plo.cont_tth_num = 24               # [int]    number of contour lines
     plo.cont_geom_cmark = 'o'           # [marker] Beam center marker (geometry)
     plo.cont_geom_csize = 4             # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00          # [float]  Contour alpha (geometry)
-    plo.cont_geom_cmap_name = 'cividis' # [cmap]   Contour colormap (geometry)
+    plo.cont_geom_cmap_name = 'viridis' # [cmap]   Contour colormap (geometry)
     plo.cont_norm_inc = False           # [bool]   Plot additional contour lines
                                         #          for normal incidence geometry
     plo.cont_orig_cmark = 'o'           # [marker] Beam center marker (original)
@@ -108,7 +108,7 @@ def get_specs():
     plo.plot_size = 8                   # [int]    Plot size
     plo.label_size = 9                  # [int]    Label size
     plo.plot_dpi = 300                  # [int]    Set plot DPI for saving
-    plo.plot_color = 0.0                # [float]  Button color from colormap (0.0 - 1.0)
+    plo.plot_color = 0.35               # [float]  Button color from colormap (0.0 - 1.0)
                                         # [str]    Button color e.g. '#1f77b4'
     plo.interactive = True              # [bool]   Make the plot interactive
     plo.action_ener = True              # [bool]   Show energy slider
