@@ -87,33 +87,36 @@ def get_specs():
     # Plot Details #
     ################
     plo = container()
-    plo.cont_tth_min = 5                          # [int]    minimum 2-theta contour line
-    plo.cont_tth_max = 90                         # [int]    maximum 2-theta contour line
-    plo.cont_tth_num = 15                         # [int]    number of contour lines
-    plo.cont_geom_cmark = 'o'                     # [marker] Beam center marker (geometry)
-    plo.cont_geom_csize = 4                       # [int]    Beam center size (geometry)
-    plo.cont_geom_alpha = 1.00                    # [float]  Contour alpha (geometry)
-    plo.cont_geom_cmap = cm.get_cmap('viridis')   # [cmap]   Contour colormap (geometry)
-    plo.cont_norm_inc = True                      # [bool]   Plot contours for normal incidence geometry
-    plo.cont_orig_cmark = 'o'                     # [marker] Beam center marker (original)
-    plo.cont_orig_csize = 4                       # [int]    Beam center size (original)
-    plo.cont_orig_alpha = 0.25                    # [float]  Contour alpha (original)
-    plo.cont_orig_color = 'gray'                  # [color]  Contour color (original)
-    plo.cont_reso_min = 50                        # [int]    Minimum contour steps
-    plo.cont_reso_max = 500                       # [int]    Maximum contour steps
-    plo.module_alpha = 0.20                       # [float]  Detector module alpha
-    plo.module_color = 'gray'                     # [color]  Detector module color
-    plo.margin_top = 0.95                         # [float]  Plot margin for title
-    plo.plot_size = 8                             # [int]    Plot size
-    plo.label_size = 9                            # [int]    Label size
-    plo.plot_dpi = 300                            # [int]    Set plot DPI for saving
-    plo.interactive = True                        # [bool]   Make the plot interactive
-    plo.action_ener = True                        # [bool]   Show energy slider
-    plo.action_dist = True                        # [bool]   Show distance slider
-    plo.action_rota = True                        # [bool]   Show rotation slider
-    plo.action_yoff = True                        # [bool]   Show offset slider
-    plo.action_tilt = True                        # [bool]   Show tilt slider
-    plo.action_radio = True                       # [bool]   Show radio buttons
+    plo.cont_tth_min = 5                # [int]    minimum 2-theta contour line
+    plo.cont_tth_max = 150              # [int]    maximum 2-theta contour line
+    plo.cont_tth_num = 30               # [int]    number of contour lines
+    plo.cont_geom_cmark = 'o'           # [marker] Beam center marker (geometry)
+    plo.cont_geom_csize = 4             # [int]    Beam center size (geometry)
+    plo.cont_geom_alpha = 1.00          # [float]  Contour alpha (geometry)
+    plo.cont_geom_cmap_name = 'cividis' # [cmap]   Contour colormap (geometry)
+    plo.cont_norm_inc = False           # [bool]   Plot additional contour lines
+                                        #          for normal incidence geometry
+    plo.cont_orig_cmark = 'o'           # [marker] Beam center marker (original)
+    plo.cont_orig_csize = 4             # [int]    Beam center size (original)
+    plo.cont_orig_alpha = 0.25          # [float]  Contour alpha (original)
+    plo.cont_orig_color = 'gray'        # [color]  Contour color (original)
+    plo.cont_reso_min = 50              # [int]    Minimum contour steps
+    plo.cont_reso_max = 500             # [int]    Maximum contour steps
+    plo.module_alpha = 0.20             # [float]  Detector module alpha
+    plo.module_color = 'gray'           # [color]  Detector module color
+    plo.margin_top = 0.95               # [float]  Plot margin for title
+    plo.plot_size = 8                   # [int]    Plot size
+    plo.label_size = 9                  # [int]    Label size
+    plo.plot_dpi = 300                  # [int]    Set plot DPI for saving
+    plo.plot_color = 0.0                # [float]  Button color from colormap (0.0 - 1.0)
+                                        # [str]    Button color e.g. '#1f77b4'
+    plo.interactive = True              # [bool]   Make the plot interactive
+    plo.action_ener = True              # [bool]   Show energy slider
+    plo.action_dist = True              # [bool]   Show distance slider
+    plo.action_rota = True              # [bool]   Show rotation slider
+    plo.action_yoff = True              # [bool]   Show offset slider
+    plo.action_tilt = True              # [bool]   Show tilt slider
+    plo.action_radio = True             # [bool]   Show radio buttons
 
     ##########
     # Limits #
@@ -129,7 +132,7 @@ def get_specs():
     lmt.yoff_max = 200.0 # [float] Offset maximum [mm]
     lmt.yoff_stp = 1.0   # [float] Offset step size [mm]
     lmt.rota_min = 0.0   # [float] Rotation minimum [deg]
-    lmt.rota_max = 45.0  # [float] Rotation maximum [deg]
+    lmt.rota_max = 75.0  # [float] Rotation maximum [deg]
     lmt.rota_stp = 1.0   # [float] Rotation step size [deg]
     lmt.tilt_min = 0.0   # [float] Tilt minimum [deg]
     lmt.tilt_max = 45.0  # [float] Tilt maximum [deg]
@@ -148,6 +151,15 @@ def main():
     if geo.unit >= len(geo.unit_names):
         print(f'Error: Valid geo.unit range is from 0 to {len(geo.unit_names)-1}, geo.unit={geo.unit}')
         raise SystemExit
+    # get colormap from name
+    plo.cont_geom_cmap = cm.get_cmap(plo.cont_geom_cmap_name)
+    # figure out the color of the buttons and slider handles
+    try:
+        # try to derive color from colormap
+        plo.plot_handle_color = plo.cont_geom_cmap(plo.plot_color)
+    except TypeError:
+        # use color as defined by user
+        plo.plot_handle_color = plo.plot_color
     # set rcParams
     plt.rcParams['savefig.dpi'] = plo.plot_dpi
     # figure out proper plot dimensions
@@ -204,7 +216,7 @@ def main():
             _ds = 1.0 - (plo.margin_top-0.01)
             # add the axes
             axs_unit = fig.add_axes([0.0, plo.margin_top-0.01, _ds, _ds], frameon=False, aspect='equal')
-            box_unit = RadioButtons(axs_unit, geo.unit_names, active=geo.unit, activecolor=u'#1f77b4')
+            box_unit = RadioButtons(axs_unit, geo.unit_names, active=geo.unit, activecolor=plo.plot_handle_color)
             box_unit.on_clicked(lambda val: update_plot('unit', geo.unit_names.index(val), fig, geo, plo, ax))
             # change label size
             for l in box_unit.labels:
@@ -327,7 +339,7 @@ def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
 
 def add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, plo):
     axs = fig.add_axes([left, bottom, width, height])
-    sli = Slider(axs, label, valmin=vmin, valmax=vmax, valinit=val, handle_style={'size':plo.label_size}, valstep=step)
+    sli = Slider(axs, label, valmin=vmin, valmax=vmax, valinit=val, handle_style={'size':plo.label_size}, valstep=step, color=plo.plot_handle_color)
     sli.vline.set_alpha(0) # Remove the mark on the slider
     sli.on_changed(lambda val: update_plot(name, val, fig, geo, plo, ax))
     sli.label.set_size(plo.label_size)
