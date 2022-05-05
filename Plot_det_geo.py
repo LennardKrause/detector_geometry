@@ -11,9 +11,9 @@ def get_specs():
     geo.det_type = 'Eiger2 CdTe'   # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'            # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.ener = 21.0                # [keV]  Beam energy
-    geo.dist = 80.0                # [mm]   Detector distance
+    geo.dist = 75.0                # [mm]   Detector distance
     geo.yoff = 0.0                 # [mm]   Detector offset (vertical)
-    geo.rota = 30.0                # [deg]  Detector rotation
+    geo.rota = 25.0                # [deg]  Detector rotation
     geo.tilt = 0.0                 # [deg]  Detector tilt
     geo.unit = 1                   # [0-3]  Contour legend (0: 2-Theta, 1: d-spacing, 2: q-space, 3: sin(theta)/lambda)
 
@@ -94,7 +94,7 @@ def get_specs():
     plo.cont_geom_csize = 4             # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00          # [float]  Contour alpha (geometry)
     plo.cont_geom_cmap_name = 'viridis' # [cmap]   Contour colormap (geometry)
-    plo.cont_norm_inc = False           # [bool]   Plot additional contour lines
+    plo.cont_norm_inc = True            # [bool]   Plot additional contour lines
                                         #          for normal incidence geometry
     plo.cont_orig_cmark = 'o'           # [marker] Beam center marker (original)
     plo.cont_orig_csize = 4             # [int]    Beam center size (original)
