@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib.widgets import RadioButtons, Slider
 from matplotlib import pyplot as plt
 from matplotlib import cm, colors, patches
-
+    
 def get_specs():
     ######################
     # Setup the geometry #
@@ -11,11 +11,27 @@ def get_specs():
     geo.det_type = 'Eiger2 CdTe'   # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'            # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.ener = 21.0                # [keV]  Beam energy
-    geo.dist = 80.0                # [mm]   Detector distance
+    geo.dist = 75.0                # [mm]   Detector distance
     geo.yoff = 0.0                 # [mm]   Detector offset (vertical)
-    geo.rota = 30.0                # [deg]  Detector rotation
+    geo.rota = 25.0                # [deg]  Detector rotation
     geo.tilt = 0.0                 # [deg]  Detector tilt
-    geo.unit = 1                   # [0-3]  Contour legend (0: 2-Theta, 1: d-spacing, 2: q-space, 3: sin(theta)/lambda)
+    geo.unit = 1                   # [0-3]  Contour legend
+                                   #          0: 2-Theta
+                                   #          1: d-spacing
+                                   #          2: q-space
+                                   #          3: sin(theta)/lambda
+    geo.std_idx = 2                # [0-3]  Plot standard contours
+                                   #          0: None
+                                   #          1: LaB6
+                                   #          2: Si
+                                   #          3: CeO2
+    # What standards should be available
+    # The d spacings will be imported from pyFAI
+    # and we use 2 lists whose ORDER must match!
+    #  - this is the display name
+    geo.std_names = ['None', r'$LaB_6$', r'$Si$', r'$CeO_2$']
+    #  - this is what pyFAI understands
+    geo.std_pyFAI = ['None', 'LaB6', 'Si', 'CeO2']
 
     ###########################
     # Detector Specifications #
@@ -81,25 +97,34 @@ def get_specs():
         det.hmn = 1       # [int] Number of modules (horizontal)
         det.vmn = 1       # [int] Number of modules (vertical)
         det.cbh = 0       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size}'
+        det.name = f'{geo.det_type} {geo.det_size} Octal'
 
     ################
     # Plot Details #
     ################
     plo = container()
+    # - geometry contour section - 
     plo.cont_tth_min = 5                # [int]    minimum 2-theta contour line
-    plo.cont_tth_max = 150              # [int]    maximum 2-theta contour line
-    plo.cont_tth_num = 30               # [int]    number of contour lines
+    plo.cont_tth_max = 120              # [int]    maximum 2-theta contour line
+    plo.cont_tth_num = 24               # [int]    number of contour lines
     plo.cont_geom_cmark = 'o'           # [marker] Beam center marker (geometry)
     plo.cont_geom_csize = 4             # [int]    Beam center size (geometry)
     plo.cont_geom_alpha = 1.00          # [float]  Contour alpha (geometry)
-    plo.cont_geom_cmap_name = 'cividis' # [cmap]   Contour colormap (geometry)
+    plo.cont_geom_cmap_name = 'viridis' # [cmap]   Contour colormap (geometry)
+    # - standard contour section - 
+    plo.cont_standard = True            # [bool]   Plot additional contour lines
+                                        #          e.g. a LaB6 standard
+    plo.cont_std_alpha = 0.15           # [float]  Standard contour alpha
+    plo.cont_std_color = 'gray'         # [color]  Standard contour color
+    plo.cont_std_lw = 2.5               # [float]  Standard contour linewidth
+    # - normal incidence contour section - 
     plo.cont_norm_inc = False           # [bool]   Plot additional contour lines
                                         #          for normal incidence geometry
-    plo.cont_orig_cmark = 'o'           # [marker] Beam center marker (original)
-    plo.cont_orig_csize = 4             # [int]    Beam center size (original)
-    plo.cont_orig_alpha = 0.25          # [float]  Contour alpha (original)
-    plo.cont_orig_color = 'gray'        # [color]  Contour color (original)
+    plo.cont_norm_cmark = 'o'           # [marker] Beam center marker (original)
+    plo.cont_norm_csize = 4             # [int]    Beam center size (original)
+    plo.cont_norm_alpha = 0.25          # [float]  Contour alpha (original)
+    plo.cont_norm_color = 'gray'        # [color]  Contour color (original)
+    # - general section - 
     plo.cont_reso_min = 50              # [int]    Minimum contour steps
     plo.cont_reso_max = 500             # [int]    Maximum contour steps
     plo.module_alpha = 0.20             # [float]  Detector module alpha
@@ -108,7 +133,7 @@ def get_specs():
     plo.plot_size = 8                   # [int]    Plot size
     plo.label_size = 9                  # [int]    Label size
     plo.plot_dpi = 300                  # [int]    Set plot DPI for saving
-    plo.plot_color = 0.0                # [float]  Button color from colormap (0.0 - 1.0)
+    plo.plot_color = 0.3                # [float]  Button color from colormap (0.0 - 1.0)
                                         # [str]    Button color e.g. '#1f77b4'
     plo.interactive = True              # [bool]   Make the plot interactive
     plo.action_ener = True              # [bool]   Show energy slider
@@ -124,9 +149,9 @@ def get_specs():
     lmt = container()
     lmt.ener_min = 1.0   # [float] Energy minimum [keV]
     lmt.ener_max = 100.0 # [float] Energy maximum [keV]
-    lmt.ener_stp = 0.1   # [float] Energy step size [keV]
+    lmt.ener_stp = 1.0   # [float] Energy step size [keV]
     lmt.dist_min = 40.0  # [float] Distance minimum [mm]
-    lmt.dist_max = 450.0 # [float] Distance maximum [mm]
+    lmt.dist_max = 150.0 # [float] Distance maximum [mm]
     lmt.dist_stp = 1.0   # [float] Distance step size [mm]
     lmt.yoff_min = 0.0   # [float] Offset minimum [mm]
     lmt.yoff_max = 200.0 # [float] Offset maximum [mm]
@@ -160,6 +185,14 @@ def main():
     except TypeError:
         # use color as defined by user
         plo.plot_handle_color = plo.plot_color
+    # import pyFAI if standard contours are enabled
+    if plo.cont_standard:
+        from pyFAI import calibrant
+        geo.pyFAI_calibrant = calibrant
+        # get contour lines f contours are already selected (index is not 0, not None)
+        if geo.std_idx > 0:
+            # get the d spacings for the calibrtant from pyFAI
+            plo.cont_std_dsp = np.array(geo.pyFAI_calibrant.get_calibrant(geo.std_pyFAI[geo.std_idx]).get_dSpacing())
     # set rcParams
     plt.rcParams['savefig.dpi'] = plo.plot_dpi
     # figure out proper plot dimensions
@@ -196,20 +229,24 @@ def main():
         if plo.action_ener:
             # make room for the sliders
             plo.margin_top -= 0.02
+            plo.margin_right = 0.6
+            # make space for the calibrant picker
+            if plo.cont_standard:
+                plo.margin_right -= 0.1
             # add slider
-            sli_ener = add_slider('Energy [keV] ' , 'ener', 0.3, plo.margin_top, 0.6, 0.025, geo.ener, lmt.ener_min, lmt.ener_max, lmt.ener_stp, fig, ax, geo, plo)
+            sli_ener = add_slider('Energy [keV] ' , 'ener', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.ener, lmt.ener_min, lmt.ener_max, lmt.ener_stp, fig, ax, geo, plo)
         if plo.action_dist:
             plo.margin_top -= 0.02
-            sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, plo.margin_top, 0.6, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, plo)
+            sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, plo)
         if plo.action_yoff:
             plo.margin_top -= 0.02
-            sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, plo.margin_top, 0.6, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, plo)
+            sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, plo)
         if plo.action_tilt:
             plo.margin_top -= 0.02
-            sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, plo.margin_top, 0.6, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, plo)
+            sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, plo)
         if plo.action_rota:
             plo.margin_top -= 0.02
-            sli_rota = add_slider('Rotation [˚] ' , 'rota', 0.3, plo.margin_top, 0.6, 0.025, geo.rota, lmt.rota_min, lmt.rota_max, lmt.rota_stp, fig, ax, geo, plo)
+            sli_rota = add_slider('Rotation [˚] ' , 'rota', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.rota, lmt.rota_min, lmt.rota_max, lmt.rota_stp, fig, ax, geo, plo)
         # add radio buttons and an axis for the buttons
         if plo.action_radio:
             # figure out a proper size of the axis
@@ -220,6 +257,17 @@ def main():
             box_unit.on_clicked(lambda val: update_plot('unit', geo.unit_names.index(val), fig, geo, plo, ax))
             # change label size
             for l in box_unit.labels:
+                l.set_size(plo.label_size)
+        # add radio buttons and an axis for the buttons
+        if plo.cont_standard:
+            # figure out a proper size of the axis
+            _ds = 1.0 - (plo.margin_top-0.01)
+            # add the axes
+            axs_std = fig.add_axes([0.85, plo.margin_top-0.01, _ds, _ds], frameon=False, aspect='equal')
+            box_std = RadioButtons(axs_std, geo.std_names, active=geo.std_idx, activecolor=plo.plot_handle_color)
+            box_std.on_clicked(lambda val: update_plot('std', geo.std_names.index(val), fig, geo, plo, ax))
+            # change label size
+            for l in box_std.labels:
                 l.set_size(plo.label_size)
     else:
         # make room for the second title line
@@ -263,7 +311,8 @@ def draw_contours(ax, geo, plo):
     # contours to be drawn as the plane is tilted
     _comp_add = np.tan(np.deg2rad(geo.tilt))*geo.dist
     # draw beam center
-    ax.plot(0, 0, color=plo.cont_orig_color, marker=plo.cont_orig_cmark, ms=plo.cont_orig_csize, alpha=plo.cont_orig_alpha)
+    if plo.cont_norm_inc:
+        ax.plot(0, 0, color=plo.cont_norm_color, marker=plo.cont_norm_cmark, ms=plo.cont_norm_csize, alpha=plo.cont_norm_alpha)
     ax.plot(0, _comp_shift, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
     # draw contour lines
     for _n,_ttd in enumerate(plo.cont_levels):
@@ -302,7 +351,7 @@ def draw_contours(ax, geo, plo):
             # don't draw contour lines that are out of bounds
             # make sure Z is large enough to draw the contour
             if np.max(Z) >= geo.dist:
-                c0 = ax.contour(X, Y, Z, [geo.dist], colors=plo.cont_orig_color, alpha=plo.cont_orig_alpha)
+                c0 = ax.contour(X, Y, Z, [geo.dist], colors=plo.cont_norm_color, alpha=plo.cont_norm_alpha)
                 # label original geometry contours
                 fmt = {c0.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
                 ax.clabel(c0, c0.levels, inline=True, fontsize=plo.label_size, fmt=fmt, manual=[(plo.xdim,plo.ydim)])
@@ -322,6 +371,42 @@ def draw_contours(ax, geo, plo):
             # will make Z only smaller -> leaving no contours to draw
             # - only True if the contours are iterated high to low!
             break
+    # plot standard contour lines
+    if plo.cont_standard and geo.std_idx > 0:
+        # this assumes that the last cycle runs for the highest resolution
+        # so _dsp holds the correct maximum value up to which the 
+        # satndard contour lines are to be drawn
+        for _d in plo.cont_std_dsp[plo.cont_std_dsp > _dsp]:
+            # lambda = 2 * d * sin(theta)
+            # 2-theta = 2 * (lambda / 2*d)
+            # lambda -> (12.398/geo_energy)
+            _ttr = 2 * np.arcsin((12.398/geo.ener) / (2*_d))
+            # calculate ratio of sample to detector distance (sdd)
+            # and contour distance to beam center (cbc)
+            # _rat = sdd/cbc = 1/tan(2-theta)
+            # this is used to scale the cones Z dimension
+            _rat = 1/np.tan(_ttr)
+            # apply the min/max grid resolution
+            _grd_res = max(min(int(plo.cont_reso_min*_rat),plo.cont_reso_max), plo.cont_reso_min)
+            # prepare the grid for the cones/contours
+            # adjust the resolution using i (-> plo.cont_levels),
+            # as smaller cones/contours (large i) need higher sampling
+            # but make sure the sampling rate doesn't fall below the
+            # user set plo.cont_reso_min value and plo.cont_reso_max
+            # prevents large numbers that will take seconds to draw
+            _x0 = np.linspace(-plo.cont_grid_max, plo.cont_grid_max, _grd_res)
+            # the grid position needs to adjusted upon change of geometry
+            # the center needs to be shifted by _geo_offset to make sure 
+            # sll contour lines are drawn
+            _x1 = np.linspace(-plo.cont_grid_max + _comp_shift, plo.cont_grid_max - _comp_shift + _comp_add, _grd_res)
+            # draw contours for the tilted/rotated/moved geometry
+            # use the offset adjusted value x1 to prepare the grid
+            X0, Y0 = np.meshgrid(_x1,_x0)
+            Z0 = np.sqrt(X0**2+Y0**2)*_rat
+            X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.yoff, geo.dist)
+            # make sure Z is large enough to draw the contour
+            if np.max(Z) > geo.dist:
+                c1 = ax.contour(X, Y, Z, [geo.dist], colors=plo.cont_std_color, alpha=plo.cont_std_alpha, linewidths=plo.cont_std_lw)
 
 def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
     # combined rotation, tilt 'movement' is compensated
@@ -367,6 +452,11 @@ def update_plot(nam, val, fig, geo, plo, ax):
         geo.unit = int(val)
     elif nam == 'ener':
         geo.ener = float(val)
+    elif nam == 'std':
+        geo.std_idx = int(val)
+        if geo.std_idx > 0:
+            # get the d spacings for the calibrtant from pyFAI
+            plo.cont_std_dsp = np.array(geo.pyFAI_calibrant.get_calibrant(geo.std_pyFAI[geo.std_idx]).get_dSpacing())
     # clear the axis
     # the beam center is a line
     for _a in ax.lines:
