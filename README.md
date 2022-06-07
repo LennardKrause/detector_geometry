@@ -14,6 +14,7 @@
  - Use the radio buttons to change contour units
 
 ## Latest update:
+  - 2022-06-07 Update: Added functionality to plot Standard (LaB6, CeO2) contours (needs [pyFAI](https://pyfai.readthedocs.io/en/master/))
   - 2022-04-28 Update: Changed contour line generation to accept a list of 2-theta values as input
   - 2022-04-27 Update: Added support for [SACLA](https://sacla.xfel.jp/?lang=en) MPCCD Detectors (central hole geometry)
   - 2022-04-25 Bugfix: calculation of the beamcenter (rotation and tilt)

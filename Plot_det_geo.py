@@ -20,7 +20,7 @@ def get_specs():
                                    #          1: d-spacing
                                    #          2: q-space
                                    #          3: sin(theta)/lambda
-    geo.std_idx = 2                # [0-3]  Plot standard contours
+    geo.std_idx = 0                # [0-3]  Plot standard contours
                                    #          0: None
                                    #          1: LaB6
                                    #          2: Si
@@ -114,7 +114,7 @@ def get_specs():
     # - standard contour section - 
     plo.cont_standard = True            # [bool]   Plot additional contour lines
                                         #          e.g. a LaB6 standard
-    plo.cont_std_alpha = 0.15           # [float]  Standard contour alpha
+    plo.cont_std_alpha = 0.25           # [float]  Standard contour alpha
     plo.cont_std_color = 'gray'         # [color]  Standard contour color
     plo.cont_std_lw = 2.5               # [float]  Standard contour linewidth
     # - normal incidence contour section - 
@@ -133,7 +133,7 @@ def get_specs():
     plo.plot_size = 8                   # [int]    Plot size
     plo.label_size = 9                  # [int]    Label size
     plo.plot_dpi = 300                  # [int]    Set plot DPI for saving
-    plo.plot_color = 0.3                # [float]  Button color from colormap (0.0 - 1.0)
+    plo.plot_color = 0.35               # [float]  Button color from colormap (0.0 - 1.0)
                                         # [str]    Button color e.g. '#1f77b4'
     plo.interactive = True              # [bool]   Make the plot interactive
     plo.action_ener = True              # [bool]   Show energy slider
