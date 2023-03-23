@@ -2,30 +2,31 @@ import numpy as np
 from matplotlib.widgets import RadioButtons, Slider
 from matplotlib import pyplot as plt
 from matplotlib import cm, colors, patches
-    
+import os, json
+
 def get_specs():
     ######################
     # Setup the geometry #
     ######################
     geo = container()
-    geo.det_type = 'Eiger2'        # [str]  Pilatus3 / Eiger2
-    geo.det_size = '4M'            # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
-    geo.ener = 21.0                # [keV]  Beam energy
-    geo.dist = 75.0                # [mm]   Detector distance
-    geo.yoff = 0.0                 # [mm]   Detector offset (vertical)
-    geo.xoff = 0.0                 # [mm]   Detector offset (horizontal)
-    geo.rota = 25.0                # [deg]  Detector rotation
-    geo.tilt = 0.0                 # [deg]  Detector tilt
-    geo.unit = 1                   # [0-3]  Contour legend
-                                   #          0: 2-Theta
-                                   #          1: d-spacing
-                                   #          2: q-space
-                                   #          3: sin(theta)/lambda
-    geo.std_idx = 0                # [0-3]  Plot standard contours
-                                   #          0: None
-                                   #          1: LaB6
-                                   #          2: Si
-                                   #          3: CeO2
+    geo.det_type = 'Eiger2' # [str]  Pilatus3 / Eiger2
+    geo.det_size = '4M'     # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
+    geo.ener = 21.0         # [keV]  Beam energy
+    geo.dist = 75.0         # [mm]   Detector distance
+    geo.yoff = 0.0          # [mm]   Detector offset (vertical)
+    geo.xoff = 0.0          # [mm]   Detector offset (horizontal)
+    geo.rota = 25.0         # [deg]  Detector rotation
+    geo.tilt = 0.0          # [deg]  Detector tilt
+    geo.unit = 1            # [0-3]  Contour legend
+                            #          0: 2-Theta
+                            #          1: d-spacing
+                            #          2: q-space
+                            #          3: sin(theta)/lambda
+    geo.std_idx = 0         # [0-3]  Plot standard contours
+                            #          0: None
+                            #          1: LaB6
+                            #          2: Si
+                            #          3: CeO2
     # What standards should be available
     # The d spacings will be imported from pyFAI
     # and we use 2 lists whose ORDER must match!
@@ -33,92 +34,6 @@ def get_specs():
     geo.std_names = ['None', r'$LaB_6$', r'$Si$', r'$CeO_2$']
     #  - this is what pyFAI understands
     geo.std_pyFAI = ['None', 'LaB6', 'Si', 'CeO2']
-
-    ###########################
-    # Detector Specifications #
-    ###########################
-    det = container()
-    if geo.det_type.upper().startswith('PILATUS3'):
-        ###############################
-        # Specifications for Pilatus3 #
-        ###############################
-        det.hms = 83.8    # [mm]  Module size (horizontal)
-        det.vms = 33.5    # [mm]  Module size (vertical)
-        det.pxs = 172e-3  # [mm]  Pixel size
-        det.hgp = 7       # [pix] Gap between modules (horizontal)
-        det.vgp = 17      # [pix] Gap between modules (vertical)
-        det.cbh = 0       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size}'
-        det.sizes = {'300K':(1,3),'1M':(2,5),'2M':(3,8),'6M':(5,12)}
-        if geo.det_size not in det.sizes.keys():
-            print('Unknown detector type/size combination!')
-            raise SystemExit
-        det.hmn, det.vmn = det.sizes[geo.det_size]
-    elif geo.det_type.upper().startswith('PILATUS4'):
-        ###############################
-        # Specifications for Pilatus4 #
-        ###############################
-        #   THESE NUMBERS ARE JUST A  #
-        #             GUESS           #
-        ###############################
-        det.hms = 75.0    # [mm]  Module size (horizontal)
-        det.vms = 39.0    # [mm]  Module size (vertical)
-        det.pxs = 150e-3  # [mm]  Pixel size
-        det.hgp = 8       # [pix] Gap between modules (horizontal)
-        det.vgp = 12      # [pix] Gap between modules (vertical)
-        det.cbh = 0       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size}'
-        det.sizes = {'260K':(1,2),'800K':(2,3),'1M':(2,4),'1.5M':(3,4),'2M':(3,6),'3M':(4,6)}
-        if geo.det_size not in det.sizes.keys():
-            print('Unknown detector type/size combination!')
-            raise SystemExit
-        det.hmn, det.vmn = det.sizes[geo.det_size]
-    elif geo.det_type.upper().startswith('EIGER2'):
-        #############################
-        # Specifications for Eiger2 #
-        #############################
-        det.hms = 77.1    # [mm]  Module size (horizontal)
-        det.vms = 38.4    # [mm]  Module size (vertical)
-        det.pxs = 75e-3   # [mm]  Pixel size
-        det.hgp = 38      # [pix] Gap between modules (horizontal)
-        det.vgp = 12      # [pix] Gap between modules (vertical)
-        det.cbh = 0       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size}'
-        det.sizes = {'1M':(1,2),'4M':(2,4),'9M':(3,6),'16M':(4,8)}
-        if geo.det_size not in det.sizes.keys():
-            print('Unknown detector type/size combination!')
-            raise SystemExit
-        det.hmn, det.vmn = det.sizes[geo.det_size]
-    elif geo.det_type.upper().startswith('MPCCD'):
-        #############################
-        # Specifications for MPCCD #
-        #############################
-        det.hms = 51.2    # [mm]  Module size (horizontal)
-        det.vms = 25.6    # [mm]  Module size (vertical)
-        det.pxs = 50e-3   # [mm]  Pixel size
-        det.hgp = 18      # [pix] Gap between modules (horizontal)
-        det.vgp = 27      # [pix] Gap between modules (vertical)
-        det.cbh = 3       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size} Octal'
-        det.sizes = {'4M':(2,4)}
-        if geo.det_size not in det.sizes.keys():
-            print('Unknown detector type/size combination!')
-            raise SystemExit
-        det.hmn, det.vmn = det.sizes[geo.det_size]
-    else:
-        print('Unknown detector name, using custom specifications!')
-        ###########################################
-        # ADD CUSTOM DETECTOR SPECIFICATIONS HERE #
-        ###########################################
-        det.hms = 100.0   # [mm]  Module size (horizontal)
-        det.vms = 140.0   # [mm]  Module size (vertical)
-        det.pxs = 10e-3   # [mm]  Pixel size
-        det.hgp = 0       # [pix] Gap between modules (horizontal)
-        det.vgp = 0       # [pix] Gap between modules (vertical)
-        det.hmn = 1       # [int] Number of modules (horizontal)
-        det.vmn = 1       # [int] Number of modules (vertical)
-        det.cbh = 0       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size}'
 
     ################
     # Plot Details #
@@ -192,11 +107,108 @@ def get_specs():
     ###################################
     # !!! Don't change below here !!! #
     ###################################
-    return geo, det, plo, lmt
+    return geo, plo, lmt
+
+def get_det_specs(geo):
+    ###########################
+    # Detector Specifications #
+    ###########################
+    det = container()
+    if geo.det_type.upper().startswith('PILATUS3'):
+        ###############################
+        # Specifications for Pilatus3 #
+        ###############################
+        det.hms = 83.8    # [mm]  Module size (horizontal)
+        det.vms = 33.5    # [mm]  Module size (vertical)
+        det.pxs = 172e-3  # [mm]  Pixel size
+        det.hgp = 7       # [pix] Gap between modules (horizontal)
+        det.vgp = 17      # [pix] Gap between modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
+        det.name = f'{geo.det_type} {geo.det_size}'
+        det.sizes = {'300K':(1,3),'1M':(2,5),'2M':(3,8),'6M':(5,12)}
+        if geo.det_size not in det.sizes.keys():
+            print('Unknown detector type/size combination!')
+            raise SystemExit
+        det.hmn, det.vmn = det.sizes[geo.det_size]
+    elif geo.det_type.upper().startswith('PILATUS4'):
+        ###############################
+        # Specifications for Pilatus3 #
+        ###############################
+        det.hms = 75.0    # [mm]  Module size (horizontal)
+        det.vms = 39.0    # [mm]  Module size (vertical)
+        det.pxs = 150e-3  # [mm]  Pixel size
+        det.hgp = 8       # [pix] Gap between modules (horizontal)
+        det.vgp = 12      # [pix] Gap between modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
+        det.name = f'{geo.det_type} {geo.det_size}'
+        det.sizes = {'260K':(1,2),'800K':(2,3),'1M':(2,4),'1.5M':(3,4),'2M':(3,6),'3M':(4,6)}
+        if geo.det_size not in det.sizes.keys():
+            print('Unknown detector type/size combination!')
+            raise SystemExit
+        det.hmn, det.vmn = det.sizes[geo.det_size]
+    elif geo.det_type.upper().startswith('EIGER2'):
+        #############################
+        # Specifications for Eiger2 #
+        #############################
+        det.hms = 77.1    # [mm]  Module size (horizontal)
+        det.vms = 38.4    # [mm]  Module size (vertical)
+        det.pxs = 75e-3   # [mm]  Pixel size
+        det.hgp = 38      # [pix] Gap between modules (horizontal)
+        det.vgp = 12      # [pix] Gap between modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
+        det.name = f'{geo.det_type} {geo.det_size}'
+        det.sizes = {'1M':(1,2),'4M':(2,4),'9M':(3,6),'16M':(4,8)}
+        if geo.det_size not in det.sizes.keys():
+            print('Unknown detector type/size combination!')
+            raise SystemExit
+        det.hmn, det.vmn = det.sizes[geo.det_size]
+    elif geo.det_type.upper().startswith('MPCCD'):
+        #############################
+        # Specifications for MPCCD #
+        #############################
+        det.hms = 51.2    # [mm]  Module size (horizontal)
+        det.vms = 25.6    # [mm]  Module size (vertical)
+        det.pxs = 50e-3   # [mm]  Pixel size
+        det.hgp = 18      # [pix] Gap between modules (horizontal)
+        det.vgp = 27      # [pix] Gap between modules (vertical)
+        det.cbh = 3       # [mm]  Central beam hole
+        det.name = f'{geo.det_type} {geo.det_size} Octal'
+        det.sizes = {'4M':(2,4)}
+        if geo.det_size not in det.sizes.keys():
+            print('Unknown detector type/size combination!')
+            raise SystemExit
+        det.hmn, det.vmn = det.sizes[geo.det_size]
+    else:
+        print('Unknown detector name, using custom specifications!')
+        ###########################################
+        # ADD CUSTOM DETECTOR SPECIFICATIONS HERE #
+        ###########################################
+        det.hms = 100.0   # [mm]  Module size (horizontal)
+        det.vms = 140.0   # [mm]  Module size (vertical)
+        det.pxs = 10e-3   # [mm]  Pixel size
+        det.hgp = 0       # [pix] Gap between modules (horizontal)
+        det.vgp = 0       # [pix] Gap between modules (vertical)
+        det.hmn = 1       # [int] Number of modules (horizontal)
+        det.vmn = 1       # [int] Number of modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
+        det.name = f'{geo.det_type} {geo.det_size}'
+    return det
+
 
 def main():
     # fetch the geometry, detector, plot specifications and limits
-    geo, det, plo, lmt = get_specs()
+    # load the default
+    geo, plo, lmt = get_specs()
+    # file name to store current settings
+    file_dump = os.path.join(os.path.dirname(__file__), 'settings.json')
+    # if file_dump doesn't exists, make a dump
+    if not os.path.exists(file_dump):
+        save_par(file_dump, geo, plo, lmt)
+    # if it exists load parameters
+    else:
+        geo, plo, lmt = load_par(file_dump, geo, plo, lmt)
+    # get the detector specs
+    det = get_det_specs(geo)
     # translate unit for plot title
     geo.unit_names = [r'2$\theta$', r'$d_{space}$', r'$q_{space}$', r'$sin(\theta)/\lambda$']
     if geo.unit >= len(geo.unit_names):
@@ -510,6 +522,21 @@ def update_plot(nam, val, fig, geo, plo, ax):
         fig.canvas.blit(ax.bbox)
     else:
         fig.canvas.draw()
+
+def save_par(save_as, geo, plo, lmt):
+    # Writing geo as dict to file
+    with open(save_as, 'w') as wf:
+        json.dump({'geo':geo.__dict__, 'plo':plo.__dict__, 'lmt':lmt.__dict__}, wf)
+
+def load_par(save_as, geo, plo, lmt):
+    # Opening JSON file as dict
+    with open(save_as, 'r') as of:
+        pars = json.load(of)
+    conv = {'geo':geo, 'plo':plo, 'lmt':lmt}
+    for key, vals in pars.items():
+        for p, x in vals.items():
+            setattr(conv[key], p, x)
+    return geo, plo, lmt
 
 class container(object):
     pass
