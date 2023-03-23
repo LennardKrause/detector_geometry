@@ -14,7 +14,7 @@
  - Use the radio buttons to change contour units.
 
 ## Latest update:
-  - 2023-03-23 Update: Settings are saved to (if doesn't exist) or loaded from (is exists) a 'settings.json' file.
+  - 2023-03-23 Update: Settings are saved to (if doesn't exist) or loaded from (if exists) a 'settings.json' file.
   - 2023-03-23 Update: Added horizontal offset and slider.
   - 2022-06-07 Update: Added functionality to plot Standard (LaB6, CeO2) contours (needs [pyFAI](https://pyfai.readthedocs.io/en/master/)).
   - 2022-04-28 Update: Changed contour line generation to accept a list of 2-theta values as input.
