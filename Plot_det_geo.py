@@ -8,11 +8,12 @@ def get_specs():
     # Setup the geometry #
     ######################
     geo = container()
-    geo.det_type = 'Eiger2 CdTe'   # [str]  Pilatus3 / Eiger2
+    geo.det_type = 'Eiger2'         # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'            # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.ener = 21.0                # [keV]  Beam energy
     geo.dist = 75.0                # [mm]   Detector distance
     geo.yoff = 0.0                 # [mm]   Detector offset (vertical)
+    geo.xoff = 0.0                 # [mm]   Detector offset (horizontal)
     geo.rota = 25.0                # [deg]  Detector rotation
     geo.tilt = 0.0                 # [deg]  Detector tilt
     geo.unit = 1                   # [0-3]  Contour legend
@@ -37,7 +38,7 @@ def get_specs():
     # Detector Specifications #
     ###########################
     det = container()
-    if geo.det_type.startswith('Pilatus'):
+    if geo.det_type.upper().startswith('PILATUS3'):
         ###############################
         # Specifications for Pilatus3 #
         ###############################
@@ -53,7 +54,23 @@ def get_specs():
             print('Unknown detector type/size combination!')
             raise SystemExit
         det.hmn, det.vmn = det.sizes[geo.det_size]
-    elif geo.det_type.startswith('Eiger'):
+    elif geo.det_type.upper().startswith('PILATUS4'):
+        ###############################
+        # Specifications for Pilatus3 #
+        ###############################
+        det.hms = 75.0    # [mm]  Module size (horizontal)
+        det.vms = 39.0    # [mm]  Module size (vertical)
+        det.pxs = 150e-3  # [mm]  Pixel size
+        det.hgp = 8       # [pix] Gap between modules (horizontal)
+        det.vgp = 12      # [pix] Gap between modules (vertical)
+        det.cbh = 0       # [mm]  Central beam hole
+        det.name = f'{geo.det_type} {geo.det_size}'
+        det.sizes = {'260K':(1,2),'800K':(2,3),'1M':(2,4),'1.5M':(3,4),'2M':(3,6),'3M':(4,6)}
+        if geo.det_size not in det.sizes.keys():
+            print('Unknown detector type/size combination!')
+            raise SystemExit
+        det.hmn, det.vmn = det.sizes[geo.det_size]
+    elif geo.det_type.upper().startswith('EIGER2'):
         #############################
         # Specifications for Eiger2 #
         #############################
@@ -69,7 +86,7 @@ def get_specs():
             print('Unknown detector type/size combination!')
             raise SystemExit
         det.hmn, det.vmn = det.sizes[geo.det_size]
-    elif geo.det_type.startswith('MPCCD'):
+    elif geo.det_type.upper().startswith('MPCCD'):
         #############################
         # Specifications for MPCCD #
         #############################
@@ -79,13 +96,14 @@ def get_specs():
         det.hgp = 18      # [pix] Gap between modules (horizontal)
         det.vgp = 27      # [pix] Gap between modules (vertical)
         det.cbh = 3       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size}'
+        det.name = f'{geo.det_type} {geo.det_size} Octal'
         det.sizes = {'4M':(2,4)}
         if geo.det_size not in det.sizes.keys():
             print('Unknown detector type/size combination!')
             raise SystemExit
         det.hmn, det.vmn = det.sizes[geo.det_size]
     else:
+        print('Unknown detector name, using custom specifications!')
         ###########################################
         # ADD CUSTOM DETECTOR SPECIFICATIONS HERE #
         ###########################################
@@ -97,7 +115,7 @@ def get_specs():
         det.hmn = 1       # [int] Number of modules (horizontal)
         det.vmn = 1       # [int] Number of modules (vertical)
         det.cbh = 0       # [mm]  Central beam hole
-        det.name = f'{geo.det_type} {geo.det_size} Octal'
+        det.name = f'{geo.det_type} {geo.det_size}'
 
     ################
     # Plot Details #
@@ -118,7 +136,7 @@ def get_specs():
     plo.cont_std_color = 'gray'         # [color]  Standard contour color
     plo.cont_std_lw = 2.5               # [float]  Standard contour linewidth
     # - normal incidence contour section - 
-    plo.cont_norm_inc = False           # [bool]   Plot additional contour lines
+    plo.cont_norm_inc = True            # [bool]   Plot additional contour lines
                                         #          for normal incidence geometry
     plo.cont_norm_cmark = 'o'           # [marker] Beam center marker (original)
     plo.cont_norm_csize = 4             # [int]    Beam center size (original)
@@ -135,11 +153,13 @@ def get_specs():
     plo.plot_dpi = 300                  # [int]    Set plot DPI for saving
     plo.plot_color = 0.35               # [float]  Button color from colormap (0.0 - 1.0)
                                         # [str]    Button color e.g. '#1f77b4'
+    plo.module_idx = False              # [bool]   Plot module index
     plo.interactive = True              # [bool]   Make the plot interactive
     plo.action_ener = True              # [bool]   Show energy slider
     plo.action_dist = True              # [bool]   Show distance slider
     plo.action_rota = True              # [bool]   Show rotation slider
-    plo.action_yoff = True              # [bool]   Show offset slider
+    plo.action_yoff = True              # [bool]   Show vertical offset slider
+    plo.action_xoff = True              # [bool]   Show horizontal offset slider
     plo.action_tilt = True              # [bool]   Show tilt slider
     plo.action_radio = True             # [bool]   Show radio buttons
 
@@ -153,16 +173,19 @@ def get_specs():
     lmt.dist_min = 40.0  # [float] Distance minimum [mm]
     lmt.dist_max = 150.0 # [float] Distance maximum [mm]
     lmt.dist_stp = 1.0   # [float] Distance step size [mm]
-    lmt.yoff_min = 0.0   # [float] Offset minimum [mm]
-    lmt.yoff_max = 200.0 # [float] Offset maximum [mm]
-    lmt.yoff_stp = 1.0   # [float] Offset step size [mm]
+    lmt.xoff_min = -50.0 # [float] Horizontal offset minimum [mm]
+    lmt.xoff_max = 50.0  # [float] Horizontal offset maximum [mm]
+    lmt.xoff_stp = 1.0   # [float] Horizontal offset step size [mm]
+    lmt.yoff_min = 0.0   # [float] Vertical offset minimum [mm]
+    lmt.yoff_max = 200.0 # [float] Vertical offset maximum [mm]
+    lmt.yoff_stp = 1.0   # [float] Vertical offset step size [mm]
     lmt.rota_min = 0.0   # [float] Rotation minimum [deg]
     lmt.rota_max = 75.0  # [float] Rotation maximum [deg]
     lmt.rota_stp = 1.0   # [float] Rotation step size [deg]
     lmt.tilt_min = 0.0   # [float] Tilt minimum [deg]
     lmt.tilt_max = 45.0  # [float] Tilt maximum [deg]
     lmt.tilt_stp = 1.0   # [float] Tilt step size [deg]
-
+    
     ###################################
     # !!! Don't change below here !!! #
     ###################################
@@ -240,7 +263,10 @@ def main():
             sli_dist = add_slider('Distance [mm] ', 'dist', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.dist, lmt.dist_min, lmt.dist_max, lmt.dist_stp, fig, ax, geo, plo)
         if plo.action_yoff:
             plo.margin_top -= 0.02
-            sli_yoff = add_slider('Offset [mm] '  , 'yoff', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, plo)
+            sli_yoff = add_slider('Y offset [mm] '  , 'yoff', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.yoff, lmt.yoff_min, lmt.yoff_max, lmt.yoff_stp, fig, ax, geo, plo)
+        if plo.action_xoff:
+            plo.margin_top -= 0.02
+            sli_xoff = add_slider('X offset [mm] '  , 'xoff', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.xoff, lmt.xoff_min, lmt.xoff_max, lmt.xoff_stp, fig, ax, geo, plo)
         if plo.action_tilt:
             plo.margin_top -= 0.02
             sli_tilt = add_slider('Tilt [˚] '     , 'tilt', 0.3, plo.margin_top, plo.margin_right, 0.025, geo.tilt, lmt.tilt_min, lmt.tilt_max, lmt.tilt_stp, fig, ax, geo, plo)
@@ -298,7 +324,8 @@ def build_detector(bg, det, plo):
             origin_x = i*(det.hms+det.hgp*det.pxs) - ((det.hms+det.hgp*det.pxs)/2)*(det.hmn%2) + (det.hgp*det.pxs)/2 + (det.cbh/2)*(2*(j&det.vmn)//det.vmn-1)
             origin_y = j*(det.vms+det.vgp*det.pxs) - ((det.vms+det.vgp*det.pxs)/2)*(det.vmn%2) + (det.vgp*det.pxs)/2 + (det.cbh/2)*(1-2*(i&det.hmn)//det.hmn)
             # DEBUG: print indices on panels
-            #bg.annotate(f'{i} {j}', (origin_x+det.hms/2, origin_y+det.vms/2), color='gray', alpha=0.2, size=16, ha='center')
+            if plo.module_idx:
+                bg.annotate(f'{i} {j}', (origin_x+det.hms/2, origin_y+det.vms/2), color='gray', alpha=0.2, size=16, ha='center')
             # add the module
             bg.add_patch(patches.Rectangle((origin_x, origin_y),  det.hms, det.vms, color=plo.module_color, alpha=plo.module_alpha))
 
@@ -313,7 +340,7 @@ def draw_contours(ax, geo, plo):
     # draw beam center
     if plo.cont_norm_inc:
         ax.plot(0, 0, color=plo.cont_norm_color, marker=plo.cont_norm_cmark, ms=plo.cont_norm_csize, alpha=plo.cont_norm_alpha)
-    ax.plot(0, _comp_shift, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
+    ax.plot(geo.xoff, _comp_shift, color=colors.to_hex(plo.cont_geom_cmap(1)), marker=plo.cont_geom_cmark, ms=plo.cont_geom_csize, alpha=plo.cont_geom_alpha)
     # draw contour lines
     for _n,_ttd in enumerate(plo.cont_levels):
         # convert theta in degrees to radians
@@ -332,10 +359,12 @@ def draw_contours(ax, geo, plo):
         # user set plo.cont_reso_min value and plo.cont_reso_max
         # prevents large numbers that will take seconds to draw
         _x0 = np.linspace(-plo.cont_grid_max, plo.cont_grid_max, _grd_res)
-        # the grid position needs to adjusted upon change of geometry
-        # the center needs to be shifted by _geo_offset to make sure 
-        # sll contour lines are drawn
+        # the grid position needs to adjusted upon change of geometry (y, vertical)
+        # the center needs to be shifted by _geo_offset to make sure all contour lines are drawn
         _x1 = np.linspace(-plo.cont_grid_max + _comp_shift, plo.cont_grid_max - _comp_shift + _comp_add, _grd_res)
+        # the grid position needs to adjusted upon change of geometry (x, horizontal)
+        # the center needs to be shifted by geo.xoff to make sure all contour lines are drawn
+        _x2 = np.linspace(-plo.cont_grid_max - geo.xoff, plo.cont_grid_max - geo.xoff, _grd_res)
         # Conversion factor keV to Angstrom: 12.398
         # sin(t)/l: np.sin(Theta) / lambda -> (12.398/geo_energy)
         _stl = np.sin(_ttr/2)/(12.398/geo.ener)
@@ -347,7 +376,7 @@ def draw_contours(ax, geo, plo):
         if plo.cont_norm_inc:
             X0, Y0 = np.meshgrid(_x0,_x0)
             Z0 = np.sqrt(X0**2+Y0**2)*_rat
-            X,Y,Z = geo_cone(X0, Y0, Z0, 0, 0, 0, geo.dist)
+            X,Y,Z = geo_cone(X0, Y0, Z0, 0, 0, 0, 0, geo.dist)
             # don't draw contour lines that are out of bounds
             # make sure Z is large enough to draw the contour
             if np.max(Z) >= geo.dist:
@@ -357,15 +386,15 @@ def draw_contours(ax, geo, plo):
                 ax.clabel(c0, c0.levels, inline=True, fontsize=plo.label_size, fmt=fmt, manual=[(plo.xdim,plo.ydim)])
         # draw contours for the tilted/rotated/moved geometry
         # use the offset adjusted value x1 to prepare the grid
-        X0, Y0 = np.meshgrid(_x1,_x0)
+        X0, Y0 = np.meshgrid(_x1,_x2)
         Z0 = np.sqrt(X0**2+Y0**2)*_rat
-        X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.yoff, geo.dist)
+        X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.xoff, geo.yoff, geo.dist)
         # make sure Z is large enough to draw the contour
         if np.max(Z) > geo.dist:
             c1 = ax.contour(X, Y, Z, [geo.dist], colors=colors.to_hex(plo.cont_geom_cmap((_n+1)/len(plo.cont_levels))), alpha=plo.cont_geom_alpha)
             # label moved geometry contours
             fmt = {c1.levels[0]:f'{np.round(_units[geo.unit],2):.2f}'}
-            ax.clabel(c1, c1.levels, inline=True, fontsize=plo.label_size, fmt=fmt, manual=[(0,plo.ydim)])
+            ax.clabel(c1, c1.levels, inline=True, fontsize=plo.label_size, fmt=fmt, manual=[(geo.xoff,plo.ydim)])
         else:
             # if the Z*i is too small, break as the following cycles
             # will make Z only smaller -> leaving no contours to draw
@@ -401,14 +430,14 @@ def draw_contours(ax, geo, plo):
             _x1 = np.linspace(-plo.cont_grid_max + _comp_shift, plo.cont_grid_max - _comp_shift + _comp_add, _grd_res)
             # draw contours for the tilted/rotated/moved geometry
             # use the offset adjusted value x1 to prepare the grid
-            X0, Y0 = np.meshgrid(_x1,_x0)
+            X0, Y0 = np.meshgrid(_x1,_x2)
             Z0 = np.sqrt(X0**2+Y0**2)*_rat
-            X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.yoff, geo.dist)
+            X,Y,Z = geo_cone(X0, Y0, Z0, geo.rota, geo.tilt, geo.xoff, geo.yoff, geo.dist)
             # make sure Z is large enough to draw the contour
             if np.max(Z) > geo.dist:
                 c1 = ax.contour(X, Y, Z, [geo.dist], colors=plo.cont_std_color, alpha=plo.cont_std_alpha, linewidths=plo.cont_std_lw)
 
-def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
+def geo_cone(X, Y, Z, rota, tilt, xoff, yoff, dist):
     # combined rotation, tilt 'movement' is compensated
     a = np.deg2rad(tilt) + np.deg2rad(rota)
     # rotate the sample around y
@@ -420,7 +449,7 @@ def geo_cone(X, Y, Z, rota, tilt, yoff, dist):
     # compensate for tilt not rotating
     # - revert the travel distance
     comp = np.deg2rad(tilt) * dist
-    return Y,X+comp-yoff,Z
+    return Y+xoff,X+comp-yoff,Z
 
 def add_slider(label, name, left, bottom, width, height, val, vmin, vmax, step, fig, ax, geo, plo):
     axs = fig.add_axes([left, bottom, width, height])
@@ -448,6 +477,8 @@ def update_plot(nam, val, fig, geo, plo, ax):
         geo.tilt = float(val)
     elif nam == 'yoff':
         geo.yoff = float(val)
+    elif nam == 'xoff':
+        geo.xoff = float(val)
     elif nam == 'unit':
         geo.unit = int(val)
     elif nam == 'ener':
