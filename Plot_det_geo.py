@@ -8,7 +8,7 @@ def get_specs():
     # Setup the geometry #
     ######################
     geo = container()
-    geo.det_type = 'Eiger2'         # [str]  Pilatus3 / Eiger2
+    geo.det_type = 'Eiger2'        # [str]  Pilatus3 / Eiger2
     geo.det_size = '4M'            # [str]  300K 1M 2M 6M / 1M 4M 9M 16M
     geo.ener = 21.0                # [keV]  Beam energy
     geo.dist = 75.0                # [mm]   Detector distance
@@ -56,7 +56,10 @@ def get_specs():
         det.hmn, det.vmn = det.sizes[geo.det_size]
     elif geo.det_type.upper().startswith('PILATUS4'):
         ###############################
-        # Specifications for Pilatus3 #
+        # Specifications for Pilatus4 #
+        ###############################
+        #   THESE NUMBERS ARE JUST A  #
+        #             GUESS           #
         ###############################
         det.hms = 75.0    # [mm]  Module size (horizontal)
         det.vms = 39.0    # [mm]  Module size (vertical)
