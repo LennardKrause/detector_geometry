@@ -526,7 +526,7 @@ def update_plot(nam, val, fig, geo, plo, ax):
 def save_par(save_as, geo, plo, lmt):
     # Writing geo as dict to file
     with open(save_as, 'w') as wf:
-        json.dump({'geo':geo.__dict__, 'plo':plo.__dict__, 'lmt':lmt.__dict__}, wf)
+        json.dump({'geo':geo.__dict__, 'plo':plo.__dict__, 'lmt':lmt.__dict__}, wf, indent=4)
 
 def load_par(save_as, geo, plo, lmt):
     # Opening JSON file as dict
