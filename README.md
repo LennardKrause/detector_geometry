@@ -1,4 +1,7 @@
 # detector_geometry
+
+# DEPRECATED! Please use [xrdPlanner](https://github.com/LennardKrause/xrdPlanner/) instead.
+
 #### A tool to project X-ray diffraction cones on a detector screen at different geometries (tilt, rotation, offset) and X-ray energies
  - Main application is to visualize the maximum achievable resolution at a given geometry.
  - The math used is not meant to bring people to the moon but to provide a quick and simple preview.
